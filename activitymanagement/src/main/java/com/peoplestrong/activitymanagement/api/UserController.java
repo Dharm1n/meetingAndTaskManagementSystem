@@ -10,6 +10,7 @@ import com.peoplestrong.activitymanagement.models.User;
 import com.peoplestrong.activitymanagement.payload.request.RoleToUserForm;
 import com.peoplestrong.activitymanagement.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -25,7 +26,7 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-@RestController @RequiredArgsConstructor @RequestMapping("/api")
+@RestController @RequiredArgsConstructor @RequestMapping("/api") @Slf4j
 public class UserController {
     private final UserService userService;
 
@@ -36,12 +37,14 @@ public class UserController {
 
     @PostMapping("/users/save")
     public ResponseEntity<User> saveUsers(@RequestBody User user) {
+        System.out.println(user);
         URI uri= URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/user/save").toUriString());
         return ResponseEntity.created(uri).body(userService.saveUser(user));
     }
 
     @PostMapping("/role/save")
     public ResponseEntity<Role> saveRole(@RequestBody Role role) {
+        //log.error("\n\nin api");
         URI uri= URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/role/save").toUriString());
         return ResponseEntity.created(uri).body(userService.saveRole(role));
     }

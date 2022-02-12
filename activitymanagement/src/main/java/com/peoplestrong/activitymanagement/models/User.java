@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.Collection;
-
+import javax.validation.constraints.NotBlank;
 import javax.persistence.*;
 
 @Entity @Data @NoArgsConstructor @AllArgsConstructor
@@ -26,9 +26,11 @@ public class User {
 	@Column(name = "last_name")
 	private String lastName;
 
-	@Column(name = "email")
+	@NotBlank
+	@Column(name = "email",unique=true)
 	private String username;
 
+	@NotBlank
 	@Column(name="password")
 	private String password;
 
