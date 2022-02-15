@@ -19,7 +19,6 @@ public class User {
 	@Column(name = "first_name")
 	private String firstName;
 
-
 	@Column(name = "middle_name")
 	private String middleName;
 

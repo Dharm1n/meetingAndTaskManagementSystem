@@ -7,10 +7,13 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.peoplestrong.activitymanagement.models.Role;
 import com.peoplestrong.activitymanagement.models.User;
+import com.peoplestrong.activitymanagement.payload.request.LoginRequest;
 import com.peoplestrong.activitymanagement.payload.request.RoleToUserForm;
 import com.peoplestrong.activitymanagement.service.UserService;
+import com.peoplestrong.activitymanagement.service.UserServiceImplementation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -28,7 +31,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController @RequiredArgsConstructor @RequestMapping("/api") @Slf4j
 public class UserController {
-    private final UserService userService;
+    @Autowired
+    private final UserServiceImplementation userService;
 
     @GetMapping("/users")
     public ResponseEntity<List<User>>getUsers() {

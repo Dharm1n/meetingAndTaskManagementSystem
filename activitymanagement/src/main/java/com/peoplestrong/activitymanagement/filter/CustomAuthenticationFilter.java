@@ -1,8 +1,11 @@
 package com.peoplestrong.activitymanagement.filter;
 
+import ch.qos.logback.core.encoder.EchoEncoder;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.peoplestrong.activitymanagement.payload.request.LoginRequest;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -11,6 +14,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -21,8 +25,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-
+import org.json.JSONObject;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
 
 @Slf4j
 public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
@@ -35,9 +40,21 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
-        String username=request.getParameter("username");
-        String password=request.getParameter("password");
-        log.info("Username is {}",username);
+
+        String requestData = null;
+        try {
+            requestData = request.getReader().lines().collect(Collectors.joining());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        String username,password;
+        JSONObject json = new JSONObject(requestData);
+        username=json.getString("username");
+        password=json.getString("password");
+
+        log.error("Username is {}",json);
+
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username,password);
         return authenticationManager.authenticate(authenticationToken);
     }
