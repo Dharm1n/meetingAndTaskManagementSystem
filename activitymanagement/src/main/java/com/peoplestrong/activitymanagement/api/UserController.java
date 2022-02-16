@@ -9,6 +9,9 @@ import com.peoplestrong.activitymanagement.models.Role;
 import com.peoplestrong.activitymanagement.models.User;
 import com.peoplestrong.activitymanagement.payload.request.LoginRequest;
 import com.peoplestrong.activitymanagement.payload.request.RoleToUserForm;
+import com.peoplestrong.activitymanagement.payload.response.MessageResponse;
+import com.peoplestrong.activitymanagement.repo.RoleRepo;
+import com.peoplestrong.activitymanagement.repo.UserRepo;
 import com.peoplestrong.activitymanagement.service.UserService;
 import com.peoplestrong.activitymanagement.service.UserServiceImplementation;
 import lombok.RequiredArgsConstructor;
@@ -34,15 +37,32 @@ public class UserController {
     @Autowired
     private final UserServiceImplementation userService;
 
+    @Autowired
+    private UserRepo userRepo;
+
+    @Autowired
+    private RoleRepo roleRepo;
+
     @GetMapping("/users")
     public ResponseEntity<List<User>>getUsers() {
         return ResponseEntity.ok().body(userService.getUsers());
     }
 
     @PostMapping("/users/save")
-    public ResponseEntity<User> saveUsers(@RequestBody User user) {
-        System.out.println(user);
+    public ResponseEntity<?> saveUser(@RequestBody User user) {
+        if(userRepo.existsByUsername(user.getUsername()))
+        {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: User already exists with email:"+ user.getUsername()));
+        }
         URI uri= URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/user/save").toUriString());
+
+        user.getRoles().clear();
+        Collection<Role> roles=new ArrayList<>();
+        Role userRole=roleRepo.findByName("ROLE_USER").orElseThrow(() ->new RuntimeException("Role Doesn't exist"));
+        roles.add(userRole);
+        user.setRoles(roles);
         return ResponseEntity.created(uri).body(userService.saveUser(user));
     }
 
@@ -57,49 +77,6 @@ public class UserController {
     public ResponseEntity<?> addRoleToUser(@RequestBody RoleToUserForm form) {
         userService.addRoleToUser(form.getUsername(),form.getRoleName());
         return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/token/refresh")
-    public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String authorizationHeader = request.getHeader(AUTHORIZATION);
-        if(authorizationHeader != null && authorizationHeader.startsWith("Bearer ")){
-
-            try {
-                String refresh_token = authorizationHeader.substring("Bearer ".length());
-                Algorithm algorithm=Algorithm.HMAC256("secret".getBytes());
-                JWTVerifier verifier= JWT.require(algorithm).build();
-                DecodedJWT decodedJWT= verifier.verify(refresh_token);
-                String username=decodedJWT.getSubject();
-                User user=userService.getUser(username);
-
-                String access_token = JWT.create()
-                        .withSubject(user.getUsername())
-                        .withIssuedAt(new Date(System.currentTimeMillis() + 1))
-                        .withClaim("roles",user.getRoles().stream().map(Role::getName).collect(Collectors.toList()))
-                        .sign(algorithm);
-
-                //response.setHeader("access_token",access_token);
-                //response.setHeader("refresh_token",refresh_token);
-                Map<String,String> tokens = new HashMap<>();
-                tokens.put("access_token",access_token);
-                tokens.put("refresh_token",refresh_token);
-                response.setContentType(APPLICATION_JSON_VALUE);
-                new ObjectMapper().writeValue(response.getOutputStream(),tokens);
-
-            }catch(Exception exception) {
-
-                response.setHeader("error",exception.getMessage());
-                response.setStatus(FORBIDDEN.value());
-                //response.sendError(FORBIDDEN.value());
-                Map<String,String> error = new HashMap<>();
-                error.put("error_message",exception.getMessage());
-                response.setContentType(APPLICATION_JSON_VALUE);
-                new ObjectMapper().writeValue(response.getOutputStream(),error);
-            }
-        }
-        else{
-            throw new RuntimeException("Refresh token is missing");
-        }
     }
 
 }
