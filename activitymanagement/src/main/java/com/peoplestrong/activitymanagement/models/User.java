@@ -6,14 +6,16 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import javax.validation.constraints.NotBlank;
 import javax.persistence.*;
 
-@Entity @Data @NoArgsConstructor @AllArgsConstructor
+@Entity @NoArgsConstructor @AllArgsConstructor
 public class User {
 
 	@Id @GeneratedValue(strategy = GenerationType.AUTO)
-	@Column(name = "user_id")
+	@Column(name = "id")
 	private Long id;
 
 	@Column(name = "first_name")
@@ -36,6 +38,20 @@ public class User {
 	@ManyToMany(fetch = FetchType.EAGER)
 	private Collection<Role> roles = new ArrayList();
 
+	@OneToMany(mappedBy = "user", orphanRemoval = true)
+	private Set<TaskAssignee> taskStatus = new HashSet<>();
+
+	@OneToMany(mappedBy = "user", orphanRemoval = true)
+	private Set<MeetingAttendee> meetingStatus = new HashSet<>();
+
+	public Set<MeetingAttendee> getMeetingStatus() {
+		return meetingStatus;
+	}
+
+	public void setMeetingStatus(Set<MeetingAttendee> meetingStatus) {
+		this.meetingStatus = meetingStatus;
+	}
+
 	public Long getId() {
 		return id;
 	}
@@ -54,10 +70,6 @@ public class User {
 
 	public String getMiddleName() {
 		return middleName;
-	}
-
-	public String getName(){
-		return firstName + " " + middleName + " " + lastName;
 	}
 
 	public void setMiddleName(String middleName) {
@@ -94,5 +106,48 @@ public class User {
 
 	public void setRoles(Collection<Role> roles) {
 		this.roles = roles;
+	}
+
+	public Set<TaskAssignee> getTaskStatus() {
+		return taskStatus;
+	}
+
+	public void setTaskStatus(Set<TaskAssignee> taskStatus) {
+		this.taskStatus = taskStatus;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		User other = (User) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		return true;
+	}
+
+	public String getName() {
+		StringBuilder fullName = new StringBuilder();
+		fullName.append(firstName);
+		fullName.append(" ");
+		fullName.append(middleName);
+		fullName.append(" ");
+		fullName.append(lastName);
+		return fullName.toString();
 	}
 }
