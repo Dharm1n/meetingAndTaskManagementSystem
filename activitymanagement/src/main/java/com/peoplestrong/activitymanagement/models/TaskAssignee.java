@@ -24,6 +24,13 @@ public class TaskAssignee {
     public TaskAssignee() {
     }
 
+    public TaskAssignee(TaskAssigneeKey id, User user, Task task, String status) {
+        this.id = id;
+        this.user = user;
+        this.task = task;
+        this.status = status;
+    }
+
     public TaskAssigneeKey getId() {
         return id;
     }

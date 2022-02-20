@@ -49,7 +49,7 @@ public class Meeting {
 	@Column(name = "description" ,length = 65450, columnDefinition = "text")
 	private String description;
 
-	@OneToMany(mappedBy = "meeting", orphanRemoval = true)
+	@OneToMany(mappedBy = "meeting", orphanRemoval = true,fetch = FetchType.LAZY)
 	private Set<MeetingAttendee> meetingAttendees = new HashSet<>();
 
 	public Long getId() {

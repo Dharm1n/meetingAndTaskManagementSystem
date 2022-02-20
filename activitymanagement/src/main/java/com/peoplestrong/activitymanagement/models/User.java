@@ -38,10 +38,10 @@ public class User {
 	@ManyToMany(fetch = FetchType.EAGER)
 	private Collection<Role> roles = new ArrayList();
 
-	@OneToMany(mappedBy = "user", orphanRemoval = true)
+	@OneToMany(mappedBy = "user", orphanRemoval = true,cascade = CascadeType.ALL,fetch = FetchType.LAZY)
 	private Set<TaskAssignee> taskStatus = new HashSet<>();
 
-	@OneToMany(mappedBy = "user", orphanRemoval = true)
+	@OneToMany(mappedBy = "user", orphanRemoval = true,cascade = CascadeType.ALL,fetch = FetchType.LAZY)
 	private Set<MeetingAttendee> meetingStatus = new HashSet<>();
 
 	public Set<MeetingAttendee> getMeetingStatus() {

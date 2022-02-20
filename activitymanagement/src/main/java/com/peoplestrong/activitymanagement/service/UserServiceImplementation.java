@@ -7,6 +7,7 @@ import com.peoplestrong.activitymanagement.repo.RoleRepo;
 import com.peoplestrong.activitymanagement.repo.UserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -23,9 +24,14 @@ import java.util.Optional;
 @Service @RequiredArgsConstructor @Transactional @Slf4j
 public class UserServiceImplementation implements UserService, UserDetailsService {
 
-    private final UserRepo userRepo;
-    private final RoleRepo roleRepo;
-    private final PasswordEncoder passwordEncoder;
+    @Autowired
+    private UserRepo userRepo;
+
+    @Autowired
+    private RoleRepo roleRepo;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> user=userRepo.findByUsername(username);
