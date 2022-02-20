@@ -39,7 +39,7 @@ public class Task {
 	@Column(name = "description" ,length = 65450, columnDefinition = "text")
 	private String description;
 
-	@OneToMany(mappedBy = "task", orphanRemoval = true)
+	@OneToMany(mappedBy = "task", orphanRemoval = true,cascade = CascadeType.ALL,fetch = FetchType.LAZY)
 	private Set<TaskAssignee> taskAssignees = new HashSet<>();
 
 	public Long getId() {
@@ -125,5 +125,18 @@ public class Task {
 		} else if (!id.equals(other.id))
 			return false;
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "Task{" +
+				"id=" + id +
+				", title='" + title + '\'' +
+				", creator=" + creator +
+				", creationTime=" + creationTime +
+				", deadline=" + deadline +
+				", description='" + description + '\'' +
+				", taskAssignees=" + taskAssignees +
+				'}';
 	}
 }
