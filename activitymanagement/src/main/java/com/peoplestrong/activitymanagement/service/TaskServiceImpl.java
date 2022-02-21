@@ -1,11 +1,12 @@
 package com.peoplestrong.activitymanagement.service;
 
-import com.peoplestrong.activitymanagement.models.Task;
-import com.peoplestrong.activitymanagement.models.TaskAssignee;
-import com.peoplestrong.activitymanagement.models.TaskAssigneeKey;
-import com.peoplestrong.activitymanagement.models.User;
+import com.peoplestrong.activitymanagement.models.*;
+import com.peoplestrong.activitymanagement.payload.request.DeleteUserFromTask;
 import com.peoplestrong.activitymanagement.payload.request.UserToTask;
+import com.peoplestrong.activitymanagement.payload.response.TaskFromCreator;
 import com.peoplestrong.activitymanagement.payload.response.TaskFromTaskassignee;
+import com.peoplestrong.activitymanagement.payload.response.UserNotFound;
+import com.peoplestrong.activitymanagement.payload.response.UserTaskStatus;
 import com.peoplestrong.activitymanagement.repo.TaskAssigneeRepo;
 import com.peoplestrong.activitymanagement.repo.TaskRepo;
 import com.peoplestrong.activitymanagement.repo.UserRepo;
@@ -32,6 +33,8 @@ public class TaskServiceImpl implements TaskService{
     @Autowired
     private TaskAssigneeRepo taskAssigneeRepo;
 
+    @Autowired
+    private UserNotFound userNotFound;
     @Override
     public int addUserToTask(UserToTask userToTask) {
         Optional<TaskAssignee> taskAssignee=taskAssigneeRepo.findByUserIdAndTaskId(userToTask.getUserId(),userToTask.getTaskId());
@@ -183,23 +186,35 @@ public class TaskServiceImpl implements TaskService{
     public ResponseEntity<?> findTaskByCreatorid(Long userid) {
         if(!userRepo.existsById(userid))
         {
-            return ResponseEntity.badRequest().body("Error: User doesn't exist.");
+            return ResponseEntity.badRequest().body(userNotFound);
         }
         List<Task> tasksCreatedbyuserList = taskRepo.findByCreator(userid);
-        Set<TaskFromTaskassignee> tasks=new HashSet<>();
+        Set<TaskFromCreator> taskCreated=new HashSet<>();
+        //Status =="" then don't show
         for(Task tasksCreatedbyuser:tasksCreatedbyuserList)
         {
-            tasks.add(new TaskFromTaskassignee(userid,
+
+            List<UserTaskStatus> userTaskStatuses=new ArrayList<>();
+            tasksCreatedbyuser.getTaskAssignees().forEach(taskAssignee1 -> {
+                userTaskStatuses.add(new UserTaskStatus(taskAssignee1.getUser().getUsername(),
+                                taskAssignee1.getUser().getName(),
+                                taskAssignee1.getStatus()
+                        )
+                );
+            });
+            taskCreated.add(new TaskFromCreator(userid,
                     tasksCreatedbyuser.getId(),
                     tasksCreatedbyuser.getTitle(),
+                    //Either query or load the whole table
                     "",
                     tasksCreatedbyuser.getCreator(),
                     tasksCreatedbyuser.getCreationTime(),
                     tasksCreatedbyuser.getDeadline(),
-                    tasksCreatedbyuser.getDescription()
+                    tasksCreatedbyuser.getDescription(),
+                    userTaskStatuses
             ));
         }
-        return ResponseEntity.ok().body(tasks);
+        return ResponseEntity.ok().body(taskCreated);
     }
 
     @Override
@@ -207,7 +222,7 @@ public class TaskServiceImpl implements TaskService{
         Optional<User> user=userRepo.findById(userid);
         if(!user.isPresent())
         {
-            return ResponseEntity.badRequest().body("Error: User doesn't exist.");
+            return ResponseEntity.badRequest().body(userNotFound);
         }
 //
 //        Set<TaskAssignee> taskAssigneeSet=user.get().getTaskStatus();
@@ -220,11 +235,11 @@ public class TaskServiceImpl implements TaskService{
         //Set<TaskAssignee> taskAssigneeSet=user.get().getTaskStatus();
 
         List<TaskAssignee> taskAssigneeSet=taskAssigneeRepo.findByUserId(userid);
-        Set<TaskFromTaskassignee> tasks=new HashSet<>();
+        Set<TaskFromTaskassignee> taskAssigned=new HashSet<>();
         for(TaskAssignee taskAssignee:taskAssigneeSet)
         {
             Task task=taskAssignee.getTask();
-            tasks.add(new TaskFromTaskassignee(userid,
+            taskAssigned.add(new TaskFromTaskassignee(userid,
                     task.getId(),
                     task.getTitle(),
                     taskAssignee.getStatus(),
@@ -234,11 +249,21 @@ public class TaskServiceImpl implements TaskService{
                     task.getDescription()
             ));
         }
+        Set<TaskFromCreator> taskCreated=new HashSet<>();
         List<Task> tasksCreatedbyuserList = taskRepo.findByCreator(userid);
         //Status =="" then don't show
         for(Task tasksCreatedbyuser:tasksCreatedbyuserList)
         {
-            tasks.add(new TaskFromTaskassignee(userid,
+
+            List<UserTaskStatus> userTaskStatuses=new ArrayList<>();
+            tasksCreatedbyuser.getTaskAssignees().forEach(taskAssignee1 -> {
+                userTaskStatuses.add(new UserTaskStatus(taskAssignee1.getUser().getUsername(),
+                        taskAssignee1.getUser().getName(),
+                        taskAssignee1.getStatus()
+                )
+                );
+            });
+            taskCreated.add(new TaskFromCreator(userid,
                     tasksCreatedbyuser.getId(),
                     tasksCreatedbyuser.getTitle(),
                     //Either query or load the whole table
@@ -246,10 +271,15 @@ public class TaskServiceImpl implements TaskService{
                     tasksCreatedbyuser.getCreator(),
                     tasksCreatedbyuser.getCreationTime(),
                     tasksCreatedbyuser.getDeadline(),
-                    tasksCreatedbyuser.getDescription()
+                    tasksCreatedbyuser.getDescription(),
+                    userTaskStatuses
                     ));
         }
-        return ResponseEntity.ok().body(tasks);
+
+        Map<String,Object> allTask=new HashMap<String,Object>();
+        allTask.put("created",taskCreated);
+        allTask.put("assigned",taskAssigned);
+        return ResponseEntity.ok().body(allTask);
     }
 
     @Override
@@ -266,8 +296,43 @@ public class TaskServiceImpl implements TaskService{
         Optional<TaskAssignee> taskAssigneefromdb=taskAssigneeRepo.findByUserIdAndTaskId(
                 userid,
                 taskfromdb.get().getId());
-        taskAssigneefromdb.get().setStatus(taskAssignee.getStatus());
-        taskAssigneeRepo.save(taskAssigneefromdb.get());
+        if(taskAssigneefromdb.isPresent())
+        {
+            taskAssigneefromdb.get().setStatus(taskAssignee.getStatus());
+            taskAssigneeRepo.save(taskAssigneefromdb.get());
+            return 0;
+        }
+        else
+            return 3;
+    }
+
+    @Override
+    public int deleteUserFromTask(DeleteUserFromTask deleteUserFromTask, Long userid) {
+        Optional<Task> task=taskRepo.findById(deleteUserFromTask.getTaskId());
+        if(!task.isPresent())
+        {
+            return 1;
+        }
+
+        if(!Objects.equals(task.get().getCreator(), userid))
+            return 2;
+        if(!userRepo.existsById(deleteUserFromTask.getUserToBeDeleted()))
+        {
+            return 3;
+        }
+
+        Optional<TaskAssignee> taskAssignee=taskAssigneeRepo.findByUserIdAndTaskId(deleteUserFromTask.getUserToBeDeleted(), deleteUserFromTask.getTaskId());
+
+        if(!taskAssignee.isPresent())
+            return 4;
+        try{
+            taskAssigneeRepo.deleteByUserIdAndTaskId(deleteUserFromTask.getUserToBeDeleted(),deleteUserFromTask.getTaskId());
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return -1;
+        }
         return 0;
     }
 }

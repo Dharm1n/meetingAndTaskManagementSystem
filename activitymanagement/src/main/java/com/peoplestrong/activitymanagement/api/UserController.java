@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -76,6 +77,11 @@ public class UserController {
         return ResponseEntity.created(uri).body(userService.saveUser(user));
     }
 
+    @GetMapping("/user/{username}")
+    public ResponseEntity<?> getUserIdByUsername(@PathVariable(name = "username") String username)
+    {
+        return userService.getUserIdByUsername(username);
+    }
 //    @PostMapping("/role/save")
 //    public ResponseEntity<Role> saveRole(@RequestBody Role role) {
 //        //log.error("\n\nin api");

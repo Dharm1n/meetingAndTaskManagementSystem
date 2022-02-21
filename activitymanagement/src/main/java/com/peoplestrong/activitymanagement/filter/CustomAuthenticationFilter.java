@@ -3,8 +3,10 @@ package com.peoplestrong.activitymanagement.filter;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.peoplestrong.activitymanagement.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -31,6 +33,8 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
 
     private final AuthenticationManager authenticationManager;
 
+    @Autowired
+    UserService userService;
     public CustomAuthenticationFilter(AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
     }
@@ -64,7 +68,7 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
         String access_token = JWT.create()
                 .withSubject(user.getUsername())
                 .withIssuedAt(new Date(System.currentTimeMillis() + 0))
-                .withExpiresAt(new Date(System.currentTimeMillis() + 1000*60*1000))
+                .withExpiresAt(new Date(System.currentTimeMillis() + 10000*60*1000))
                 .withClaim("roles",user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                 .sign(algorithm);
         log.info("Current time is {}",System.currentTimeMillis());

@@ -3,11 +3,14 @@ package com.peoplestrong.activitymanagement.service;
 
 import com.peoplestrong.activitymanagement.models.Role;
 import com.peoplestrong.activitymanagement.models.User;
+import com.peoplestrong.activitymanagement.payload.response.GetUserid;
+import com.peoplestrong.activitymanagement.payload.response.MessageResponse;
 import com.peoplestrong.activitymanagement.repo.RoleRepo;
 import com.peoplestrong.activitymanagement.repo.UserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -93,5 +96,14 @@ public class UserServiceImplementation implements UserService, UserDetailsServic
     @Override
     public List<User> getUsers() {
         return userRepo.findAll();
+    }
+
+    @Override
+    public ResponseEntity<?> getUserIdByUsername(String username) {
+        Optional<User> user=userRepo.findByUsername(username);
+        if(!user.isPresent())
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: User Doesn't exist."));
+        else
+            return ResponseEntity.ok().body(new GetUserid(user.get().getId()));
     }
 }

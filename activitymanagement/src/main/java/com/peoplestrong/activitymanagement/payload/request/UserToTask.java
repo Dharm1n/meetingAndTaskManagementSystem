@@ -1,6 +1,7 @@
 package com.peoplestrong.activitymanagement.payload.request;
 
 public class UserToTask {
+    //User to be addded
     private Long userId;
     private Long taskId;
     private String status;
@@ -13,6 +14,7 @@ public class UserToTask {
 
     public UserToTask() {
     }
+
 
     public String getStatus() {
         return status;

@@ -1,0 +1,317 @@
+package com.peoplestrong.activitymanagement.service;
+
+import com.peoplestrong.activitymanagement.models.*;
+import com.peoplestrong.activitymanagement.payload.request.DeleteUserFromMeeting;
+import com.peoplestrong.activitymanagement.payload.request.UserToMeeting;
+import com.peoplestrong.activitymanagement.payload.response.*;
+import com.peoplestrong.activitymanagement.repo.MeetingAttendeeRepo;
+import com.peoplestrong.activitymanagement.repo.MeetingRepo;
+import com.peoplestrong.activitymanagement.repo.UserRepo;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+import java.util.*;
+
+@Service @RequiredArgsConstructor  @Slf4j @Transactional
+public class MeetingServiceImpl implements MeetingService{
+
+    @Autowired
+    MeetingRepo meetingRepo;
+
+    @Autowired
+    UserRepo userRepo;
+
+    @Autowired
+    MeetingAttendeeRepo meetingAttendeeRepo;
+
+    @Autowired
+    UserNotFound userNotFound;
+
+    @Override
+    public int addUserToMeeting(UserToMeeting userToMeeting) {
+        Optional<MeetingAttendee> meetingAttendee=meetingAttendeeRepo.findByMeetingIdAndUserId(userToMeeting.getMeetingId(),userToMeeting.getUserId());
+        Optional<User> user=userRepo.findById(userToMeeting.getUserId());
+        Optional<Meeting> meeting=meetingRepo.findById(userToMeeting.getMeetingId());
+
+        if(meetingAttendee.isPresent())
+        {
+            log.error("User is already invited for the meeting");
+            return 3;
+        }
+        if(!user.isPresent())
+        {
+            log.error("User not found in db");
+            return 2;
+        }
+        if(!meeting.isPresent())
+        {
+            log.error("Meeting doesn't exist.");
+            return 1;
+        }
+
+        try{
+            meetingAttendeeRepo.save(
+                    new MeetingAttendee(new MeetingAttendeeKey(user.get().getId(),meeting.get().getId()),
+                            user.get(),
+                            meeting.get(),
+                            userToMeeting.getStatus()
+                    ));
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return -1;
+        }
+        return 0;
+    }
+
+    @Override
+    public int updateMeeting(Meeting meeting) {
+        Optional<Meeting> meetingfromdb=meetingRepo.findById(meeting.getId());
+
+        if(!meetingfromdb.isPresent())
+        {
+            return 1;
+        }
+        if(!userRepo.existsById(meeting.getCreator()))
+        {
+            return 2;
+        }
+
+        meetingfromdb.get().setCreator(meeting.getCreator());
+        meetingfromdb.get().setMeetingTime(meeting.getMeetingTime());
+        meetingfromdb.get().setDescription(meeting.getDescription());
+        meetingfromdb.get().setPurpose(meeting.getPurpose());
+        meetingfromdb.get().setPlace(meeting.getPlace());
+        meetingfromdb.get().getMeetingAttendees().clear();
+        meetingfromdb.get().getMeetingAttendees().addAll(meeting.getMeetingAttendees());
+
+        meetingRepo.save(meetingfromdb.get());
+
+        return 0;
+    }
+
+    @Override
+    public int updateMeetingTime(Meeting meeting) {
+        Optional<Meeting> meetingfromdb=meetingRepo.findById(meeting.getId());
+
+        if(!meetingfromdb.isPresent())
+        {
+            return 1;
+        }
+        if(!userRepo.existsById(meeting.getCreator()))
+        {
+            return 2;
+        }
+        meetingfromdb.get().setMeetingTime(meeting.getMeetingTime());
+        meetingRepo.save(meetingfromdb.get());
+
+        return 0;
+    }
+
+    @Override
+    public int updateMeetingDescription(Meeting meeting) {
+        Optional<Meeting> meetingfromdb=meetingRepo.findById(meeting.getId());
+
+        if(!meetingfromdb.isPresent())
+        {
+            return 1;
+        }
+        if(!userRepo.existsById(meeting.getCreator()))
+        {
+            return 2;
+        }
+        meetingfromdb.get().setDescription(meeting.getDescription());
+        meetingRepo.save(meetingfromdb.get());
+
+        return 0;
+    }
+
+    @Override
+    public int updateMeetingPurpose(Meeting meeting) {
+        Optional<Meeting> meetingfromdb=meetingRepo.findById(meeting.getId());
+
+        if(!meetingfromdb.isPresent())
+        {
+            return 1;
+        }
+        if(!userRepo.existsById(meeting.getCreator()))
+        {
+            return 2;
+        }
+        meetingfromdb.get().setPurpose(meeting.getPurpose());
+        meetingRepo.save(meetingfromdb.get());
+
+        return 0;
+    }
+
+    @Override
+    public int updateMeetingPlace(Meeting meeting) {
+        Optional<Meeting> meetingfromdb=meetingRepo.findById(meeting.getId());
+
+        if(!meetingfromdb.isPresent())
+        {
+            return 1;
+        }
+        if(!userRepo.existsById(meeting.getCreator()))
+        {
+            return 2;
+        }
+        meetingfromdb.get().setPlace(meeting.getPlace());
+        meetingRepo.save(meetingfromdb.get());
+
+        return 0;
+    }
+
+    @Override
+    public int updateMeetingStatus(Long userid, MeetingAttendee meetingAttendee) {
+        Optional<Meeting> meetingfromdb=meetingRepo.findById(meetingAttendee.getMeeting().getId());
+        if(!meetingfromdb.isPresent())
+        {
+            return 1;
+        }
+        if(!userRepo.existsById(userid))
+        {
+            return 2;
+        }
+        Optional<MeetingAttendee> meetingAttendeefromdb=meetingAttendeeRepo.findByMeetingIdAndUserId(
+                userid,
+                meetingfromdb.get().getId());
+        if(meetingAttendeefromdb.isPresent())
+        {
+            meetingAttendeefromdb.get().setStatus(meetingAttendee.getStatus());
+            meetingAttendeeRepo.save(meetingAttendeefromdb.get());
+            return 0;
+        }
+        else
+            return 3;
+    }
+
+    @Override
+    public int deleteMeetingById(Long meetingId,Long userid) {
+
+        Optional<Meeting> meeting=meetingRepo.findById(meetingId);
+        if(!meeting.isPresent())
+        {
+            return 1;
+        }
+        if(meeting.get().getCreator()!=userid)
+            return 2;
+        meetingRepo.deleteById(meetingId);
+        return 0;
+    }
+
+    @Override
+    public int deleteUserFromMeeting(DeleteUserFromMeeting deleteUserFromMeeting, Long userid) {
+        Optional<Meeting> meeting=meetingRepo.findById(deleteUserFromMeeting.getMeetingId());
+        if(!meeting.isPresent())
+        {
+            return 1;
+        }
+        if(!Objects.equals(meeting.get().getCreator(), userid))
+            return 2;
+        if(!userRepo.existsById(deleteUserFromMeeting.getUserToBeDeleted()))
+            return 3;
+        Optional<MeetingAttendee> meetingAttendee=meetingAttendeeRepo.findByMeetingIdAndUserId(deleteUserFromMeeting.getMeetingId(),deleteUserFromMeeting.getUserToBeDeleted());
+
+        if(!meetingAttendee.isPresent())
+            return 4;
+        try{
+            meetingAttendeeRepo.deleteByUserIdAndMeetingId(deleteUserFromMeeting.getUserToBeDeleted(),deleteUserFromMeeting.getMeetingId());
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return -1;
+        }
+        return 0;
+    }
+
+    @Override
+    public ResponseEntity<?> findMeetingByCreatorid(Long userid) {
+        if(!userRepo.existsById(userid))
+        {
+            return ResponseEntity.badRequest().body(userNotFound);
+        }
+        List<Meeting> meetingCreatedbyuserList = meetingRepo.findByCreator(userid);
+        Set<MeetingFromCreator> meetingCreated=new HashSet<>();
+        //Status =="" then don't show
+        for(Meeting meetingCreatedbyuser:meetingCreatedbyuserList)
+        {
+
+            List<UserMeetingStatus> userMeetingStatuses=new ArrayList<>();
+            meetingCreatedbyuser.getMeetingAttendees().forEach(meetingAssignee1 -> {
+                userMeetingStatuses.add(new UserMeetingStatus(meetingAssignee1.getUser().getUsername(),
+                        meetingAssignee1.getUser().getName(),
+                        meetingAssignee1.getStatus()
+                        )
+                );
+            });
+            meetingCreated.add(new MeetingFromCreator(meetingCreatedbyuser.getId(),
+                    meetingCreatedbyuser.getPurpose(),
+                    userid,
+                    meetingCreatedbyuser.getCreationTime(),
+                    meetingCreatedbyuser.getMeetingTime(),
+                    meetingCreatedbyuser.getDescription(),
+                    userMeetingStatuses
+            ));
+        }
+        return ResponseEntity.ok().body(meetingCreated);
+    }
+
+    @Override
+    public ResponseEntity<?> getAllMeetingsByUserid(Long userid) {
+        if(!userRepo.existsById(userid))
+        {
+            return ResponseEntity.badRequest().body(userNotFound);
+        }
+        List<Meeting> meetingCreatedbyuserList = meetingRepo.findByCreator(userid);
+        Set<MeetingFromCreator> meetingCreated=new HashSet<>();
+        //Status =="" then don't show
+        for(Meeting meetingCreatedbyuser:meetingCreatedbyuserList)
+        {
+
+            List<UserMeetingStatus> userMeetingStatuses=new ArrayList<>();
+            meetingCreatedbyuser.getMeetingAttendees().forEach(meetingAssignee1 -> {
+                userMeetingStatuses.add(new UserMeetingStatus(meetingAssignee1.getUser().getUsername(),
+                                meetingAssignee1.getUser().getName(),
+                                meetingAssignee1.getStatus()
+                        )
+                );
+            });
+            meetingCreated.add(new MeetingFromCreator(meetingCreatedbyuser.getId(),
+                    meetingCreatedbyuser.getPurpose(),
+                    userid,
+                    meetingCreatedbyuser.getCreationTime(),
+                    meetingCreatedbyuser.getMeetingTime(),
+                    meetingCreatedbyuser.getDescription(),
+                    userMeetingStatuses
+            ));
+        }
+
+        List<MeetingAttendee> meetingAttendeeList=meetingAttendeeRepo.findByUserId(userid);
+        Set<MeetingFromMeetingAttendee> meetingAttend=new HashSet<>();
+        for(MeetingAttendee meetingAttendee:meetingAttendeeList)
+        {
+            Meeting meeting=meetingAttendee.getMeeting();
+            meetingAttend.add(new MeetingFromMeetingAttendee(meeting.getId(),
+                    meeting.getPurpose(),
+                    meeting.getCreator(),
+                    meeting.getCreationTime(),
+                    meeting.getMeetingTime(),
+                    meeting.getDescription(),
+                    meetingAttendee.getStatus()
+            ));
+        }
+        Map<String,Object> allTask=new HashMap<String,Object>();
+        allTask.put("created",meetingCreated);
+        allTask.put("assigned",meetingAttend);
+        return ResponseEntity.ok().body(allTask);
+    }
+
+
+}

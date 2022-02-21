@@ -1,14 +1,10 @@
 package com.peoplestrong.activitymanagement.payload.response;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-
-import javax.persistence.Column;
-import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TaskFromTaskassignee {
+public class TaskFromCreator {
     private Long userid;
     private Long taskid;
     private String title;
@@ -17,11 +13,13 @@ public class TaskFromTaskassignee {
     private LocalDateTime creationTime;
     private LocalDateTime deadline;
     private String description;
+    private List<UserTaskStatus> userTaskStatuses=new ArrayList<>();
 
-    public TaskFromTaskassignee() {
+
+    public TaskFromCreator() {
     }
 
-    public TaskFromTaskassignee(Long userid, Long taskid, String title, String status, Long creator, LocalDateTime creationTime, LocalDateTime deadline, String description) {
+    public TaskFromCreator(Long userid, Long taskid, String title, String status, Long creator, LocalDateTime creationTime, LocalDateTime deadline, String description, List<UserTaskStatus> userTaskStatuses) {
         this.userid = userid;
         this.taskid = taskid;
         this.title = title;
@@ -30,6 +28,15 @@ public class TaskFromTaskassignee {
         this.creationTime = creationTime;
         this.deadline = deadline;
         this.description = description;
+        this.userTaskStatuses = userTaskStatuses;
+    }
+
+    public List<UserTaskStatus> getUserTaskStatuses() {
+        return userTaskStatuses;
+    }
+
+    public void setUserTaskStatuses(List<UserTaskStatus> userTaskStatuses) {
+        this.userTaskStatuses = userTaskStatuses;
     }
 
     public Long getUserid() {

@@ -2,6 +2,7 @@ package com.peoplestrong.activitymanagement.service;
 
 import com.peoplestrong.activitymanagement.models.Task;
 import com.peoplestrong.activitymanagement.models.TaskAssignee;
+import com.peoplestrong.activitymanagement.payload.request.DeleteUserFromTask;
 import com.peoplestrong.activitymanagement.payload.request.UserToTask;
 import org.springframework.http.ResponseEntity;
 
@@ -27,4 +28,6 @@ public interface TaskService {
     ResponseEntity<?> getAllTasksByUserid(Long userid);
 
     int updateTaskStatus(Long userid, TaskAssignee task);
+
+    int deleteUserFromTask(DeleteUserFromTask deleteUserFromTask, Long userid);
 }

@@ -21,6 +21,13 @@ public class MeetingAttendee {
     @Column(name = "status")
     private String status;
 
+    public MeetingAttendee(MeetingAttendeeKey id, User user, Meeting meeting, String status) {
+        this.id = id;
+        this.user = user;
+        this.meeting = meeting;
+        this.status = status;
+    }
+
     public MeetingAttendee() {
     }
 
