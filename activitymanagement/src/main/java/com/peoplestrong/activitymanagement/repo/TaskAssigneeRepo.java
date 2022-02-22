@@ -14,4 +14,5 @@ public interface TaskAssigneeRepo extends JpaRepository<TaskAssignee,Long> {
     List<TaskAssignee> findByUserId(Long usreId);
 
     List<TaskAssignee> deleteByUserIdAndTaskId(Long userId,Long taskId);
+    List<TaskAssignee> findByTaskId(Long taskId);
 }

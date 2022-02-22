@@ -1,12 +1,10 @@
 package com.peoplestrong.activitymanagement.service;
 
+import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import com.peoplestrong.activitymanagement.models.*;
 import com.peoplestrong.activitymanagement.payload.request.DeleteUserFromTask;
 import com.peoplestrong.activitymanagement.payload.request.UserToTask;
-import com.peoplestrong.activitymanagement.payload.response.TaskFromCreator;
-import com.peoplestrong.activitymanagement.payload.response.TaskFromTaskassignee;
-import com.peoplestrong.activitymanagement.payload.response.UserNotFound;
-import com.peoplestrong.activitymanagement.payload.response.UserTaskStatus;
+import com.peoplestrong.activitymanagement.payload.response.*;
 import com.peoplestrong.activitymanagement.repo.TaskAssigneeRepo;
 import com.peoplestrong.activitymanagement.repo.TaskRepo;
 import com.peoplestrong.activitymanagement.repo.UserRepo;
@@ -36,6 +34,13 @@ public class TaskServiceImpl implements TaskService{
 
     @Autowired
     private UserNotFound userNotFound;
+
+    @Autowired
+    TaskNotFound taskNotFound;
+
+    @Autowired
+    NoAuthority noAuthority;
+
     @Override
     public int addUserToTask(UserToTask userToTask) {
         Optional<TaskAssignee> taskAssignee=taskAssigneeRepo.findByUserIdAndTaskId(userToTask.getUserId(),userToTask.getTaskId());
@@ -59,11 +64,7 @@ public class TaskServiceImpl implements TaskService{
             return 1;
         }
         log.error("{}",taskRepo.findById(userToTask.getTaskId()).get().toString());
-        //Option 2
-        //user.get().getTaskStatus().add(new TaskAssignee(null,user.get(),task.get(),userToTask.getStatus()));
-        //userRepo.save(user.get());
 
-        //Option 1
         try{
             taskAssigneeRepo.save(
                     new TaskAssignee(new TaskAssigneeKey(user.get().getId(),task.get().getId()),
@@ -81,7 +82,6 @@ public class TaskServiceImpl implements TaskService{
 
     }
 
-    // Can't update creation time.
     @Override
     public int updateTask(Task task) {
         Optional<Task> taskfromdb=taskRepo.findById(task.getId());
@@ -94,14 +94,12 @@ public class TaskServiceImpl implements TaskService{
         {
             return 2;
         }
-//        taskfromdb.get().setId(task.getId());
+
         taskfromdb.get().setCreator(task.getCreator());
         taskfromdb.get().setDeadline(task.getDeadline());
         taskfromdb.get().setDescription(task.getDescription());
         taskfromdb.get().setTitle(task.getTitle());
 
-        taskfromdb.get().getTaskAssignees().clear();
-        taskfromdb.get().getTaskAssignees().addAll(task.getTaskAssignees());
         taskRepo.save(taskfromdb.get());
 
         return 0;
@@ -357,5 +355,40 @@ public class TaskServiceImpl implements TaskService{
             return 3;
     }
 
+    @Override
+    public ResponseEntity<?> findAllNonInvitedUsers(Long userId, Long taskId) {
+        Optional<Task> taskfromdb=taskRepo.findById(taskId);
+        if(!taskfromdb.isPresent())
+        {
+            return ResponseEntity.badRequest().body(taskNotFound);
+        }
 
+        Optional<User> userfromdb=userRepo.findById(userId);
+        if(!userfromdb.isPresent())
+        {
+            return ResponseEntity.badRequest().body(userNotFound);
+        }
+
+        if(!Objects.equals(taskfromdb.get().getCreator(), userId))
+        {
+            return ResponseEntity.badRequest().body(noAuthority);
+        }
+
+        String username=userfromdb.get().getUsername();
+        int orgStartIndex=username.indexOf('@');
+
+        String orgName=username.substring(orgStartIndex);
+
+        List<User> usersfromdb=userRepo.findByUsernameEndsWith(orgName);
+
+        List<UserNameEmail> userNameEmailsList=new ArrayList<>();
+
+        usersfromdb.forEach(user -> {
+            if(!taskAssigneeRepo.findByUserIdAndTaskId(user.getId(),taskId).isPresent())
+            {
+                userNameEmailsList.add(new UserNameEmail(user.getId(), user.getUsername(),user.getName()));
+            }
+        });
+        return ResponseEntity.ok().body(userNameEmailsList);
+    }
 }

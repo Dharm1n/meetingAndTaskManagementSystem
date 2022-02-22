@@ -3,13 +3,13 @@ package com.peoplestrong.activitymanagement.payload.response;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TaskNotFound {
-    String message="Task doesn't exist.";
+public class NoAuthority {
+    private String message="You Don't have authority to do this operation";
 
-    public TaskNotFound() {
+    public NoAuthority() {
     }
 
-    public TaskNotFound(String message) {
+    public NoAuthority(String message) {
         this.message = message;
     }
 

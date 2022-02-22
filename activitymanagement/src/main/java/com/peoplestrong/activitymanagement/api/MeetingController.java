@@ -6,6 +6,7 @@ import com.peoplestrong.activitymanagement.payload.request.AddMeeting;
 import com.peoplestrong.activitymanagement.payload.request.DeleteUserFromMeeting;
 import com.peoplestrong.activitymanagement.payload.request.UserToMeeting;
 import com.peoplestrong.activitymanagement.payload.request.DeleteMeetingRequest;
+import com.peoplestrong.activitymanagement.payload.response.IdResponse;
 import com.peoplestrong.activitymanagement.payload.response.MeetingNotFound;
 import com.peoplestrong.activitymanagement.payload.response.MessageResponse;
 import com.peoplestrong.activitymanagement.payload.response.UserNotFound;
@@ -64,7 +65,7 @@ public class MeetingController {
         {
             addUserToMeeting(new UserToMeeting(userid,meeting.getId(),"Not responded"));
         }
-        return ResponseEntity.created(uri).body(meeting.getId());
+        return ResponseEntity.created(uri).body(new IdResponse(meeting.getId()));
     }
 
 //   ----------------   UPDATE Meeting ------------------------------------------------------------------------------------------------
@@ -192,6 +193,11 @@ public class MeetingController {
         return meetingService.findMeetingByCreatorid(userid);
     }
 
+    @GetMapping("/meeting/noninvited")
+    public ResponseEntity<?> findAllNonInvitedUsers(@RequestParam Long userId,@RequestParam Long meetingId)
+    {
+        return meetingService.findAllNonInvitedUsers(userId,meetingId);
+    }
     @GetMapping("/meeting/user/{userid}")
     public ResponseEntity<?> getAllMeetingsByUserid(@PathVariable(name = "userid") Long userid)
     {

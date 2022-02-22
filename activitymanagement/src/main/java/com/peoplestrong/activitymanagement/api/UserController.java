@@ -2,7 +2,9 @@ package com.peoplestrong.activitymanagement.api;
 
 import com.peoplestrong.activitymanagement.models.Role;
 import com.peoplestrong.activitymanagement.models.User;
+import com.peoplestrong.activitymanagement.payload.response.IdResponse;
 import com.peoplestrong.activitymanagement.payload.response.MessageResponse;
+import com.peoplestrong.activitymanagement.payload.response.UserNameEmail;
 import com.peoplestrong.activitymanagement.repo.RoleRepo;
 import com.peoplestrong.activitymanagement.repo.UserRepo;
 import com.peoplestrong.activitymanagement.service.UserService;
@@ -56,7 +58,12 @@ public class UserController {
         String orgName=username.substring(orgStartIndex);
         log.error(orgName);
 
-        return ResponseEntity.ok().body(userRepo.findByUsernameEndsWith(orgName));
+        List<User> userList=userRepo.findByUsernameEndsWith(orgName);
+        List<UserNameEmail> userNameEmails=new ArrayList<>();
+        userList.forEach(user -> {
+            userNameEmails.add(new UserNameEmail(user.getId(), user.getUsername(),user.getName()));
+        });
+        return ResponseEntity.ok().body(userNameEmails);
     }
 
     @PostMapping("/users/save")
@@ -74,7 +81,8 @@ public class UserController {
         Role userRole=roleRepo.findByName("ROLE_USER").orElseThrow(() ->new RuntimeException("Role Doesn't exist"));
         roles.add(userRole);
         user.setRoles(roles);
-        return ResponseEntity.created(uri).body(userService.saveUser(user));
+        userRepo.save(user);
+        return ResponseEntity.created(uri).body(new IdResponse(user.getId()));
     }
 
     @GetMapping("/user/{username}")

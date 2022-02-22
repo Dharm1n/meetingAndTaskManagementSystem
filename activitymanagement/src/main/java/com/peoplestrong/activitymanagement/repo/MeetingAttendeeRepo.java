@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface MeetingAttendeeRepo extends JpaRepository<MeetingAttendee,Long> {
     Optional<MeetingAttendee> findByMeetingIdAndUserId(Long meetingId,Long userId);
     List<MeetingAttendee> findByUserId(Long userid);
+    List<MeetingAttendee> findByMeetingId(Long meetingId);
 
-    //@Query(value="DELETE FROM meeting_attendee as TA WHERE TA.user_id = ?1 AND TA.meeting_id = ?2",nativeQuery = true)
     List<MeetingAttendee> deleteByUserIdAndMeetingId(Long userid,Long meetingid);
 }

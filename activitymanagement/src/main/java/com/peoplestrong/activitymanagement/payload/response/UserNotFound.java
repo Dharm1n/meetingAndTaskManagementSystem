@@ -4,20 +4,20 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class UserNotFound {
-    String errorMessage="Error: User doesn't exist.";
+    String message="Error: User doesn't exist.";
 
-    public UserNotFound(String errorMessage) {
-        this.errorMessage = errorMessage;
+    public UserNotFound(String message) {
+        this.message = message;
     }
 
     public UserNotFound() {
     }
 
-    public String getErrorMessage() {
-        return errorMessage;
+    public String getMessage() {
+        return message;
     }
 
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

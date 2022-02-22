@@ -4,20 +4,20 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class MeetingNotFound {
-    String errorMessage="Meeting not found.";
+    String message="Meeting not found.";
 
     public MeetingNotFound() {
     }
 
-    public MeetingNotFound(String errorMessage) {
-        this.errorMessage = errorMessage;
+    public MeetingNotFound(String message) {
+        this.message = message;
     }
 
-    public String getErrorMessage() {
-        return errorMessage;
+    public String getMessage() {
+        return message;
     }
 
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

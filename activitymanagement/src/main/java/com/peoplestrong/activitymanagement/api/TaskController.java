@@ -4,6 +4,7 @@ import com.peoplestrong.activitymanagement.models.Task;
 import com.peoplestrong.activitymanagement.models.TaskAssignee;
 import com.peoplestrong.activitymanagement.models.User;
 import com.peoplestrong.activitymanagement.payload.request.*;
+import com.peoplestrong.activitymanagement.payload.response.IdResponse;
 import com.peoplestrong.activitymanagement.payload.response.MessageResponse;
 import com.peoplestrong.activitymanagement.payload.response.TaskNotFound;
 import com.peoplestrong.activitymanagement.payload.response.UserNotFound;
@@ -59,7 +60,7 @@ public class TaskController {
                     "To do"
             ));
         }
-        return ResponseEntity.created(uri).body(task);
+        return ResponseEntity.created(uri).body(new IdResponse(task.getId()));
     }
 
 //   ----------------   UPDATE TASK ------------------------------------------------------------------------------------------------
@@ -217,6 +218,12 @@ public class TaskController {
     public ResponseEntity<?> getTasksCreatedBy(@PathVariable(name = "userid") Long userid)
     {
         return taskService.findTaskByCreatorid(userid);
+    }
+
+    @GetMapping("/task/noninvited")
+    public ResponseEntity<?> findAllNonInvitedUsers(@RequestParam Long userId,@RequestParam Long taskId)
+    {
+        return taskService.findAllNonInvitedUsers(userId,taskId);
     }
 
     @GetMapping("/task/user/{userid}")

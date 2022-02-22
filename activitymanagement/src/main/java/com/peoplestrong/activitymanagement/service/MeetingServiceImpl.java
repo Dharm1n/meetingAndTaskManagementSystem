@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import javax.transaction.Transactional;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -30,7 +31,13 @@ public class MeetingServiceImpl implements MeetingService{
     MeetingAttendeeRepo meetingAttendeeRepo;
 
     @Autowired
+    MeetingNotFound meetingNotFound;
+
+    @Autowired
     UserNotFound userNotFound;
+
+    @Autowired
+    NoAuthority noAuthority;
 
     @Override
     public int addUserToMeeting(UserToMeeting userToMeeting) {
@@ -88,8 +95,6 @@ public class MeetingServiceImpl implements MeetingService{
         meetingfromdb.get().setDescription(meeting.getDescription());
         meetingfromdb.get().setPurpose(meeting.getPurpose());
         meetingfromdb.get().setPlace(meeting.getPlace());
-        meetingfromdb.get().getMeetingAttendees().clear();
-        meetingfromdb.get().getMeetingAttendees().addAll(meeting.getMeetingAttendees());
 
         meetingRepo.save(meetingfromdb.get());
 
@@ -341,5 +346,41 @@ public class MeetingServiceImpl implements MeetingService{
         return ResponseEntity.ok().body(allMeeting);
     }
 
+    @Override
+    public ResponseEntity<?> findAllNonInvitedUsers(Long userId, Long meetingId) {
+        Optional<Meeting> meetingfromdb=meetingRepo.findById(meetingId);
+        if(!meetingfromdb.isPresent())
+        {
+            return ResponseEntity.badRequest().body(meetingNotFound);
+        }
 
+        Optional<User> userfromdb=userRepo.findById(userId);
+        if(!userfromdb.isPresent())
+        {
+            return ResponseEntity.badRequest().body(userNotFound);
+        }
+
+        if(!Objects.equals(meetingfromdb.get().getCreator(), userId))
+        {
+            return ResponseEntity.badRequest().body(noAuthority);
+        }
+
+        String username=userfromdb.get().getUsername();
+        int orgStartIndex=username.indexOf('@');
+
+        String orgName=username.substring(orgStartIndex);
+
+        List<User> usersfromdb=userRepo.findByUsernameEndsWith(orgName);
+        List<MeetingAttendee> meetingAttendeesfromdb=meetingAttendeeRepo.findByMeetingId(meetingId);
+
+        List<UserNameEmail> userNameEmailsList=new ArrayList<>();
+
+        usersfromdb.forEach(user -> {
+            if(!meetingAttendeeRepo.findByMeetingIdAndUserId(meetingId,user.getId()).isPresent())
+            {
+                userNameEmailsList.add(new UserNameEmail(user.getId(), user.getUsername(),user.getName()));
+            }
+        });
+        return ResponseEntity.ok().body(userNameEmailsList);
+    }
 }

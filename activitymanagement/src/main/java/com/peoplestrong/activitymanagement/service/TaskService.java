@@ -30,4 +30,6 @@ public interface TaskService {
     int updateTaskStatus(Long userid, UserToTask userToTask);
 
     int deleteUserFromTask(DeleteUserFromTask deleteUserFromTask, Long userid);
+
+    ResponseEntity<?> findAllNonInvitedUsers(Long userId, Long taskId);
 }

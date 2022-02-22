@@ -28,4 +28,6 @@ public interface MeetingService {
     ResponseEntity<?> getAllMeetingsByUserid(Long userid);
 
     int deleteUserFromMeeting(DeleteUserFromMeeting deleteUserFromMeeting, Long userid);
+
+    ResponseEntity<?> findAllNonInvitedUsers(Long userId, Long meetingId);
 }
