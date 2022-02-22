@@ -12,8 +12,11 @@ public class MeetingFromCreator {
     private LocalDateTime meetingTime;
     private String description;
     private List<UserMeetingStatus> meetingAttendees=new ArrayList<>();
+    private Long accepted;
+    private Long rejected;
+    private String creatorName;
 
-    public MeetingFromCreator(Long meetingid, String purpose, Long creator, LocalDateTime creationTime, LocalDateTime meetingTime, String description, List<UserMeetingStatus> meetingAttendees) {
+    public MeetingFromCreator(Long meetingid, String purpose, Long creator, LocalDateTime creationTime, LocalDateTime meetingTime, String description, List<UserMeetingStatus> meetingAttendees, Long accepted, Long rejected, String creatorName) {
         this.meetingid = meetingid;
         this.purpose = purpose;
         this.creator = creator;
@@ -21,6 +24,33 @@ public class MeetingFromCreator {
         this.meetingTime = meetingTime;
         this.description = description;
         this.meetingAttendees = meetingAttendees;
+        this.accepted = accepted;
+        this.rejected = rejected;
+        this.creatorName = creatorName;
+    }
+
+    public Long getAccepted() {
+        return accepted;
+    }
+
+    public void setAccepted(Long accepted) {
+        this.accepted = accepted;
+    }
+
+    public Long getRejected() {
+        return rejected;
+    }
+
+    public void setRejected(Long rejected) {
+        this.rejected = rejected;
+    }
+
+    public String getCreatorName() {
+        return creatorName;
+    }
+
+    public void setCreatorName(String creatorName) {
+        this.creatorName = creatorName;
     }
 
     public MeetingFromCreator() {

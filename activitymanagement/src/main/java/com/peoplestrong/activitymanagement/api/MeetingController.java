@@ -2,6 +2,7 @@ package com.peoplestrong.activitymanagement.api;
 
 import com.peoplestrong.activitymanagement.models.Meeting;
 import com.peoplestrong.activitymanagement.models.MeetingAttendee;
+import com.peoplestrong.activitymanagement.payload.request.AddMeeting;
 import com.peoplestrong.activitymanagement.payload.request.DeleteUserFromMeeting;
 import com.peoplestrong.activitymanagement.payload.request.UserToMeeting;
 import com.peoplestrong.activitymanagement.payload.request.DeleteMeetingRequest;
@@ -20,7 +21,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
+import java.util.Optional;
 
 @RestController @RequiredArgsConstructor @RequestMapping("/api") @Slf4j @PreAuthorize("hasRole('ROLE_USER')")
 public class MeetingController {
@@ -42,14 +46,28 @@ public class MeetingController {
 //    --------------   CREATE Meeting   ------------------------------------------------------------------------------------------------
     //Add a meeting
     @PostMapping("/meeting")
-    public ResponseEntity<?> addMeeting(@RequestBody Meeting meeting)
+    public ResponseEntity<?> addMeeting(@RequestBody AddMeeting addMeeting)
     {
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        Meeting meeting=new Meeting(null,
+                    addMeeting.getPurpose(),
+                addMeeting.getCreator(),
+                addMeeting.getPlace(),
+                LocalDateTime.parse(addMeeting.getCreationTime(), formatter),
+                LocalDateTime.parse(addMeeting.getMeetingTime(), formatter),
+                addMeeting.getDescription()
+                );
         meetingRepo.save(meeting);
         URI uri= URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/meeting").toUriString());
-        return ResponseEntity.created(uri).body(meeting);
+        for(Long userid:addMeeting.getMeetingAttendees())
+        {
+            addUserToMeeting(new UserToMeeting(userid,meeting.getId(),"Not responded"));
+        }
+        return ResponseEntity.created(uri).body(meeting.getId());
     }
 
-//   ----------------   UPDATE TASK ------------------------------------------------------------------------------------------------
+//   ----------------   UPDATE Meeting ------------------------------------------------------------------------------------------------
     private ResponseEntity<?> returnByStatus(int status)
     {
         if(status==0)
@@ -60,12 +78,14 @@ public class MeetingController {
             return ResponseEntity.badRequest().body(userNotFound);
         else if(status==3)
             return ResponseEntity.badRequest().body("Error: User is already assigned to that meeting.");
+        else if(status==4)
+            return ResponseEntity.badRequest().body("Error: User is not assigned to that meeting.");
         else
             return ResponseEntity.badRequest().body("Some error occurred please try again");
 
     }
 
-    //Add a user to task
+    //Add a user to Meeting
     @PostMapping("/meeting/adduser")
     public ResponseEntity<?> addUserToMeeting(@RequestBody UserToMeeting userToMeeting)
     {
@@ -74,26 +94,26 @@ public class MeetingController {
     }
 
     @PutMapping("/meeting/{userid}")
-    public ResponseEntity<?> updateTask(@PathVariable(name = "userid") Long userid, @RequestBody Meeting meeting)
+    public ResponseEntity<?> updateMeeting(@PathVariable(name = "userid") Long userid, @RequestBody Meeting meeting)
     {
         if(!Objects.equals(userid, meeting.getCreator()))
-            return ResponseEntity.badRequest().body("Error: Only creator of the task can change thr creator property.");
+            return ResponseEntity.badRequest().body("Error: Only creator of the Meeting can change thr creator property.");
         int status=meetingService.updateMeeting(meeting);
         return returnByStatus(status);
     }
 
     @PutMapping("/meeting/meetingtime/{userid}")
-    public ResponseEntity<?> updateTaskDeadline(@PathVariable(name = "userid") Long userid,@RequestBody Meeting meeting)
+    public ResponseEntity<?> updateMeetingTime(@PathVariable(name = "userid") Long userid,@RequestBody Meeting meeting)
     {
         if(!Objects.equals(userid, meeting.getCreator()))
-            return ResponseEntity.badRequest().body("Error: Only creator of the task can change thr creator property.");
+            return ResponseEntity.badRequest().body("Error: Only creator of the Meeting can change thr creator property.");
         int status=meetingService.updateMeetingTime(meeting);
         return returnByStatus(status);
     }
 
 
     @PutMapping("/meeting/description/{userid}")
-    public ResponseEntity<?> updateTaskDescription(@PathVariable(name = "userid") Long userid,@RequestBody Meeting meeting)
+    public ResponseEntity<?> updateMeetingDescription(@PathVariable(name = "userid") Long userid,@RequestBody Meeting meeting)
     {
         if(!Objects.equals(userid, meeting.getCreator()))
             return ResponseEntity.badRequest().body("Error: Only creator of the meeting can change the creator property.");
@@ -106,7 +126,7 @@ public class MeetingController {
     public ResponseEntity<?> updateMeetingPurpose(@PathVariable(name = "userid") Long userid,@RequestBody Meeting meeting)
     {
         if(!Objects.equals(userid, meeting.getCreator()))
-            return ResponseEntity.badRequest().body("Error: Only creator of the task can change thr creator property.");
+            return ResponseEntity.badRequest().body("Error: Only creator of the Meeting can change thr creator property.");
         int status=meetingService.updateMeetingPurpose(meeting);
         return returnByStatus(status);
     }
@@ -116,24 +136,24 @@ public class MeetingController {
     public ResponseEntity<?> updateMeetingPlace(@PathVariable(name = "userid") Long userid,@RequestBody Meeting meeting)
     {
         if(!Objects.equals(userid, meeting.getCreator()))
-            return ResponseEntity.badRequest().body("Error: Only creator of the task can change thr creator property.");
+            return ResponseEntity.badRequest().body("Error: Only creator of the Meeting can change thr creator property.");
         int status=meetingService.updateMeetingPlace(meeting);
         return returnByStatus(status);
     }
 
-
     @PutMapping("/meeting/status/{userid}")
-    public ResponseEntity<?> updateMeetingStatus(@PathVariable(name = "userid") Long userid, @RequestBody MeetingAttendee meetingAttendee)
+    public ResponseEntity<?> updateMeetingStatus(@PathVariable(name = "userid") Long userid, @RequestBody UserToMeeting userToMeeting)
     {
-        int status=meetingService.updateMeetingStatus(userid,meetingAttendee);
+        int status=meetingService.updateMeetingStatus(userid,userToMeeting);
         return returnByStatus(status);
     }
+
 
     //   ----------------   DELETE Meeting ------------------------------------------------------------------------------------------------
     //Delete a meeting by id
 
     @DeleteMapping("/meeting/{userid}")
-    public ResponseEntity<?> deleteTaskById(@PathVariable(name = "userid") Long userid, @RequestBody DeleteMeetingRequest deleteMeetingRequest)
+    public ResponseEntity<?> deleteMeetingById(@PathVariable(name = "userid") Long userid, @RequestBody DeleteMeetingRequest deleteMeetingRequest)
     {
         int status=meetingService.deleteMeetingById(deleteMeetingRequest.getMeetingId(),userid);
         if(status==0)

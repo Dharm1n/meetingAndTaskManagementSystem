@@ -3,10 +3,7 @@ package com.peoplestrong.activitymanagement.api;
 import com.peoplestrong.activitymanagement.models.Task;
 import com.peoplestrong.activitymanagement.models.TaskAssignee;
 import com.peoplestrong.activitymanagement.models.User;
-import com.peoplestrong.activitymanagement.payload.request.DeleteTaskRequest;
-import com.peoplestrong.activitymanagement.payload.request.DeleteUserFromMeeting;
-import com.peoplestrong.activitymanagement.payload.request.DeleteUserFromTask;
-import com.peoplestrong.activitymanagement.payload.request.UserToTask;
+import com.peoplestrong.activitymanagement.payload.request.*;
 import com.peoplestrong.activitymanagement.payload.response.MessageResponse;
 import com.peoplestrong.activitymanagement.payload.response.TaskNotFound;
 import com.peoplestrong.activitymanagement.payload.response.UserNotFound;
@@ -21,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 @RestController @RequiredArgsConstructor @RequestMapping("/api") @Slf4j @PreAuthorize("hasRole('ROLE_USER')")
@@ -40,10 +39,26 @@ public class TaskController {
 //    --------------   CREATE TASK   ------------------------------------------------------------------------------------------------
     //Add a task
     @PostMapping("/task")
-    public ResponseEntity<?> addTask(@RequestBody Task task)
+    public ResponseEntity<?> addTask(@RequestBody AddTask addTask)
     {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        Task task=new Task(null,
+                addTask.getTitle(),
+                addTask.getCreator(),
+                LocalDateTime.parse(addTask.getCreationTime(), formatter),
+                LocalDateTime.parse(addTask.getDeadline(), formatter),
+                addTask.getDescription()
+                );
         taskRepo.save(task);
         URI uri= URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/task").toUriString());
+
+        for(Long userid:addTask.getTaskAssignees())
+        {
+            addUserToTask(new UserToTask(userid,
+                    task.getId(),
+                    "To do"
+            ));
+        }
         return ResponseEntity.created(uri).body(task);
     }
 
@@ -52,8 +67,6 @@ public class TaskController {
     @PostMapping("/task/adduser")
     public ResponseEntity<?> addUserToTask(@RequestBody UserToTask userToTask)
     {
-        //if(user)
-          //  return ResponseEntity.badRequest().body("Error: Only creator of the task can change thr creator property.");
         int status=taskService.addUserToTask(userToTask);
         if(status==0)
             return ResponseEntity.ok().build();
@@ -152,9 +165,9 @@ public class TaskController {
 
 
     @PutMapping("/task/status/{userid}")
-    public ResponseEntity<?> updateTaskStatus(@PathVariable(name = "userid") Long userid,@RequestBody TaskAssignee taskAssignee)
+    public ResponseEntity<?> updateTaskStatus(@PathVariable(name = "userid") Long userid,@RequestBody UserToTask userToTask)
     {
-        int status=taskService.updateTaskStatus(userid,taskAssignee);
+        int status=taskService.updateTaskStatus(userid,userToTask);
         if(status==0)
             return ResponseEntity.ok().build();
         else if(status==1)

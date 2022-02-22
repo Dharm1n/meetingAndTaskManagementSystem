@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service @RequiredArgsConstructor  @Slf4j @Transactional
 public class MeetingServiceImpl implements MeetingService{
@@ -168,8 +169,8 @@ public class MeetingServiceImpl implements MeetingService{
     }
 
     @Override
-    public int updateMeetingStatus(Long userid, MeetingAttendee meetingAttendee) {
-        Optional<Meeting> meetingfromdb=meetingRepo.findById(meetingAttendee.getMeeting().getId());
+    public int updateMeetingStatus(Long userid, UserToMeeting userToMeeting) {
+        Optional<Meeting> meetingfromdb=meetingRepo.findById(userToMeeting.getMeetingId());
         if(!meetingfromdb.isPresent())
         {
             return 1;
@@ -179,16 +180,17 @@ public class MeetingServiceImpl implements MeetingService{
             return 2;
         }
         Optional<MeetingAttendee> meetingAttendeefromdb=meetingAttendeeRepo.findByMeetingIdAndUserId(
-                userid,
-                meetingfromdb.get().getId());
+                meetingfromdb.get().getId(),
+                userid
+                );
         if(meetingAttendeefromdb.isPresent())
         {
-            meetingAttendeefromdb.get().setStatus(meetingAttendee.getStatus());
+            meetingAttendeefromdb.get().setStatus(userToMeeting.getStatus());
             meetingAttendeeRepo.save(meetingAttendeefromdb.get());
             return 0;
         }
         else
-            return 3;
+            return 4;
     }
 
     @Override
@@ -233,48 +235,18 @@ public class MeetingServiceImpl implements MeetingService{
 
     @Override
     public ResponseEntity<?> findMeetingByCreatorid(Long userid) {
-        if(!userRepo.existsById(userid))
+        Optional<User> user=userRepo.findById(userid);
+        if(!user.isPresent())
         {
             return ResponseEntity.badRequest().body(userNotFound);
         }
         List<Meeting> meetingCreatedbyuserList = meetingRepo.findByCreator(userid);
         Set<MeetingFromCreator> meetingCreated=new HashSet<>();
-        //Status =="" then don't show
+
         for(Meeting meetingCreatedbyuser:meetingCreatedbyuserList)
         {
-
-            List<UserMeetingStatus> userMeetingStatuses=new ArrayList<>();
-            meetingCreatedbyuser.getMeetingAttendees().forEach(meetingAssignee1 -> {
-                userMeetingStatuses.add(new UserMeetingStatus(meetingAssignee1.getUser().getUsername(),
-                        meetingAssignee1.getUser().getName(),
-                        meetingAssignee1.getStatus()
-                        )
-                );
-            });
-            meetingCreated.add(new MeetingFromCreator(meetingCreatedbyuser.getId(),
-                    meetingCreatedbyuser.getPurpose(),
-                    userid,
-                    meetingCreatedbyuser.getCreationTime(),
-                    meetingCreatedbyuser.getMeetingTime(),
-                    meetingCreatedbyuser.getDescription(),
-                    userMeetingStatuses
-            ));
-        }
-        return ResponseEntity.ok().body(meetingCreated);
-    }
-
-    @Override
-    public ResponseEntity<?> getAllMeetingsByUserid(Long userid) {
-        if(!userRepo.existsById(userid))
-        {
-            return ResponseEntity.badRequest().body(userNotFound);
-        }
-        List<Meeting> meetingCreatedbyuserList = meetingRepo.findByCreator(userid);
-        Set<MeetingFromCreator> meetingCreated=new HashSet<>();
-        //Status =="" then don't show
-        for(Meeting meetingCreatedbyuser:meetingCreatedbyuserList)
-        {
-
+            AtomicInteger acceptedCount= new AtomicInteger(0);
+            AtomicInteger rejectedCount= new AtomicInteger(0);
             List<UserMeetingStatus> userMeetingStatuses=new ArrayList<>();
             meetingCreatedbyuser.getMeetingAttendees().forEach(meetingAssignee1 -> {
                 userMeetingStatuses.add(new UserMeetingStatus(meetingAssignee1.getUser().getUsername(),
@@ -282,6 +254,14 @@ public class MeetingServiceImpl implements MeetingService{
                                 meetingAssignee1.getStatus()
                         )
                 );
+                if(meetingAssignee1.getStatus().equals("Accepted"))
+                {
+                    acceptedCount.getAndIncrement();
+                }
+                else if(meetingAssignee1.getStatus().equals("Rejected"))
+                {
+                    rejectedCount.getAndIncrement();
+                }
             });
             meetingCreated.add(new MeetingFromCreator(meetingCreatedbyuser.getId(),
                     meetingCreatedbyuser.getPurpose(),
@@ -289,10 +269,57 @@ public class MeetingServiceImpl implements MeetingService{
                     meetingCreatedbyuser.getCreationTime(),
                     meetingCreatedbyuser.getMeetingTime(),
                     meetingCreatedbyuser.getDescription(),
-                    userMeetingStatuses
+                    userMeetingStatuses,
+                    (long) acceptedCount.get(),
+                    (long) rejectedCount.get(),
+                    user.get().getName()
             ));
         }
+        return ResponseEntity.ok().body(meetingCreated);
+    }
 
+    @Override
+    public ResponseEntity<?> getAllMeetingsByUserid(Long userid) {
+        Optional<User> user=userRepo.findById(userid);
+        if(!user.isPresent())
+        {
+            return ResponseEntity.badRequest().body(userNotFound);
+        }
+        List<Meeting> meetingCreatedbyuserList = meetingRepo.findByCreator(userid);
+        Set<MeetingFromCreator> meetingCreated=new HashSet<>();
+
+        for(Meeting meetingCreatedbyuser:meetingCreatedbyuserList)
+        {
+            AtomicInteger acceptedCount= new AtomicInteger(0);
+            AtomicInteger rejectedCount= new AtomicInteger(0);
+            List<UserMeetingStatus> userMeetingStatuses=new ArrayList<>();
+            meetingCreatedbyuser.getMeetingAttendees().forEach(meetingAssignee1 -> {
+                userMeetingStatuses.add(new UserMeetingStatus(meetingAssignee1.getUser().getUsername(),
+                                meetingAssignee1.getUser().getName(),
+                                meetingAssignee1.getStatus()
+                        )
+                );
+                if(meetingAssignee1.getStatus().equals("Accepted"))
+                {
+                    acceptedCount.getAndIncrement();
+                }
+                else if(meetingAssignee1.getStatus().equals("Rejected"))
+                {
+                    rejectedCount.getAndIncrement();
+                }
+            });
+            meetingCreated.add(new MeetingFromCreator(meetingCreatedbyuser.getId(),
+                    meetingCreatedbyuser.getPurpose(),
+                    userid,
+                    meetingCreatedbyuser.getCreationTime(),
+                    meetingCreatedbyuser.getMeetingTime(),
+                    meetingCreatedbyuser.getDescription(),
+                    userMeetingStatuses,
+                    (long) acceptedCount.get(),
+                    (long) rejectedCount.get(),
+                    user.get().getName()
+            ));
+        }
         List<MeetingAttendee> meetingAttendeeList=meetingAttendeeRepo.findByUserId(userid);
         Set<MeetingFromMeetingAttendee> meetingAttend=new HashSet<>();
         for(MeetingAttendee meetingAttendee:meetingAttendeeList)
@@ -304,13 +331,14 @@ public class MeetingServiceImpl implements MeetingService{
                     meeting.getCreationTime(),
                     meeting.getMeetingTime(),
                     meeting.getDescription(),
-                    meetingAttendee.getStatus()
+                    meetingAttendee.getStatus(),
+                    userRepo.findById(meeting.getCreator()).get().getName()
             ));
         }
-        Map<String,Object> allTask=new HashMap<String,Object>();
-        allTask.put("created",meetingCreated);
-        allTask.put("assigned",meetingAttend);
-        return ResponseEntity.ok().body(allTask);
+        Map<String,Object> allMeeting=new HashMap<String,Object>();
+        allMeeting.put("created",meetingCreated);
+        allMeeting.put("assigned",meetingAttend);
+        return ResponseEntity.ok().body(allMeeting);
     }
 
 

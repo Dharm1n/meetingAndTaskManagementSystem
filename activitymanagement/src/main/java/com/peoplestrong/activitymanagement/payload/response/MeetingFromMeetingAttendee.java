@@ -12,8 +12,9 @@ public class MeetingFromMeetingAttendee {
     private LocalDateTime meetingTime;
     private String description;
     private String status;
+    private String creatorName;
 
-    public MeetingFromMeetingAttendee(Long meetingid, String purpose, Long creator, LocalDateTime creationTime, LocalDateTime meetingTime, String description,String status) {
+    public MeetingFromMeetingAttendee(Long meetingid, String purpose, Long creator, LocalDateTime creationTime, LocalDateTime meetingTime, String description, String status, String creatorName) {
         this.meetingid = meetingid;
         this.purpose = purpose;
         this.creator = creator;
@@ -21,6 +22,23 @@ public class MeetingFromMeetingAttendee {
         this.meetingTime = meetingTime;
         this.description = description;
         this.status = status;
+        this.creatorName = creatorName;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getCreatorName() {
+        return creatorName;
+    }
+
+    public void setCreatorName(String creatorName) {
+        this.creatorName = creatorName;
     }
 
     public MeetingFromMeetingAttendee() {

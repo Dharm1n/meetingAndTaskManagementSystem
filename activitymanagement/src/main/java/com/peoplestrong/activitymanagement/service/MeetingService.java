@@ -19,7 +19,7 @@ public interface MeetingService {
 
     int updateMeetingPlace(Meeting meeting);
 
-    int updateMeetingStatus(Long userid, MeetingAttendee meetingAttendee);
+    int updateMeetingStatus(Long userid, UserToMeeting userToMeeting);
 
     int deleteMeetingById(Long meetingId,Long userid);
 

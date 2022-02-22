@@ -30,12 +30,6 @@ public class Meeting {
 	@Column(name = "place")
 	private String place;
 
-	@Column(name = "accepted")
-	private Long accepted;
-
-	@Column(name = "rejected")
-	private Long rejected;
-
 	@NotBlank
 	@Column(name = "creation_time")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm")
@@ -84,22 +78,6 @@ public class Meeting {
 		this.place = place;
 	}
 
-	public Long getAccepted() {
-		return accepted;
-	}
-
-	public void setAccepted(Long accepted) {
-		this.accepted = accepted;
-	}
-
-	public Long getRejected() {
-		return rejected;
-	}
-
-	public void setRejected(Long rejected) {
-		this.rejected = rejected;
-	}
-
 	public LocalDateTime getCreationTime() {
 		return creationTime;
 	}
@@ -130,6 +108,16 @@ public class Meeting {
 
 	public void setMeetingAttendees(Set<MeetingAttendee> meetingAttendees) {
 		this.meetingAttendees = meetingAttendees;
+	}
+
+	public Meeting(Long id, String purpose, Long creator, String place, LocalDateTime creationTime, LocalDateTime meetingTime, String description) {
+		this.id = id;
+		this.purpose = purpose;
+		this.creator = creator;
+		this.place = place;
+		this.creationTime = creationTime;
+		this.meetingTime = meetingTime;
+		this.description = description;
 	}
 
 	@Override

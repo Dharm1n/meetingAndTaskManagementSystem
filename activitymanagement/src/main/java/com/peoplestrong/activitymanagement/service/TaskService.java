@@ -27,7 +27,7 @@ public interface TaskService {
 
     ResponseEntity<?> getAllTasksByUserid(Long userid);
 
-    int updateTaskStatus(Long userid, TaskAssignee task);
+    int updateTaskStatus(Long userid, UserToTask userToTask);
 
     int deleteUserFromTask(DeleteUserFromTask deleteUserFromTask, Long userid);
 }

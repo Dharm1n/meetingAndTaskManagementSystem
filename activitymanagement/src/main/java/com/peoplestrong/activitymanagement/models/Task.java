@@ -42,6 +42,15 @@ public class Task {
 	@OneToMany(mappedBy = "task", orphanRemoval = true,cascade = CascadeType.ALL,fetch = FetchType.LAZY)
 	private Set<TaskAssignee> taskAssignees = new HashSet<>();
 
+	public Task(Long id, String title, Long creator, LocalDateTime creationTime, LocalDateTime deadline, String description) {
+		this.id = id;
+		this.title = title;
+		this.creator = creator;
+		this.creationTime = creationTime;
+		this.deadline = deadline;
+		this.description = description;
+	}
+
 	public Long getId() {
 		return id;
 	}

@@ -17,11 +17,12 @@ public class TaskFromTaskassignee {
     private LocalDateTime creationTime;
     private LocalDateTime deadline;
     private String description;
+    private String creatorName;
 
     public TaskFromTaskassignee() {
     }
 
-    public TaskFromTaskassignee(Long userid, Long taskid, String title, String status, Long creator, LocalDateTime creationTime, LocalDateTime deadline, String description) {
+    public TaskFromTaskassignee(Long userid, Long taskid, String title, String status, Long creator, LocalDateTime creationTime, LocalDateTime deadline, String description, String creatorName) {
         this.userid = userid;
         this.taskid = taskid;
         this.title = title;
@@ -30,6 +31,15 @@ public class TaskFromTaskassignee {
         this.creationTime = creationTime;
         this.deadline = deadline;
         this.description = description;
+        this.creatorName = creatorName;
+    }
+
+    public String getCreatorName() {
+        return creatorName;
+    }
+
+    public void setCreatorName(String creatorName) {
+        this.creatorName = creatorName;
     }
 
     public Long getUserid() {

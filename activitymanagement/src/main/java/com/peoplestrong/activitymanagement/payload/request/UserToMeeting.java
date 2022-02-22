@@ -1,5 +1,7 @@
 package com.peoplestrong.activitymanagement.payload.request;
 
+import java.util.List;
+
 public class UserToMeeting {
     private Long userId;
     private Long meetingId;

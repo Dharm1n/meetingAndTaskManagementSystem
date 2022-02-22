@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import javax.swing.text.html.Option;
 import javax.transaction.Transactional;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service @RequiredArgsConstructor @Transactional @Slf4j
 public class TaskServiceImpl implements TaskService{
@@ -182,129 +183,6 @@ public class TaskServiceImpl implements TaskService{
         return 0;
     }
 
-    @Override
-    public ResponseEntity<?> findTaskByCreatorid(Long userid) {
-        if(!userRepo.existsById(userid))
-        {
-            return ResponseEntity.badRequest().body(userNotFound);
-        }
-        List<Task> tasksCreatedbyuserList = taskRepo.findByCreator(userid);
-        Set<TaskFromCreator> taskCreated=new HashSet<>();
-        //Status =="" then don't show
-        for(Task tasksCreatedbyuser:tasksCreatedbyuserList)
-        {
-
-            List<UserTaskStatus> userTaskStatuses=new ArrayList<>();
-            tasksCreatedbyuser.getTaskAssignees().forEach(taskAssignee1 -> {
-                userTaskStatuses.add(new UserTaskStatus(taskAssignee1.getUser().getUsername(),
-                                taskAssignee1.getUser().getName(),
-                                taskAssignee1.getStatus()
-                        )
-                );
-            });
-            taskCreated.add(new TaskFromCreator(userid,
-                    tasksCreatedbyuser.getId(),
-                    tasksCreatedbyuser.getTitle(),
-                    //Either query or load the whole table
-                    "",
-                    tasksCreatedbyuser.getCreator(),
-                    tasksCreatedbyuser.getCreationTime(),
-                    tasksCreatedbyuser.getDeadline(),
-                    tasksCreatedbyuser.getDescription(),
-                    userTaskStatuses
-            ));
-        }
-        return ResponseEntity.ok().body(taskCreated);
-    }
-
-    @Override
-    public ResponseEntity<?> getAllTasksByUserid(Long userid) {
-        Optional<User> user=userRepo.findById(userid);
-        if(!user.isPresent())
-        {
-            return ResponseEntity.badRequest().body(userNotFound);
-        }
-//
-//        Set<TaskAssignee> taskAssigneeSet=user.get().getTaskStatus();
-//        List<Task> tasks=new ArrayList<>();
-//        for(TaskAssignee taskAssignee:taskAssigneeSet)
-//        {
-//            tasks.add(taskAssignee.getTask());
-//        }
-//        return ResponseEntity.ok().body(tasks);
-        //Set<TaskAssignee> taskAssigneeSet=user.get().getTaskStatus();
-
-        List<TaskAssignee> taskAssigneeSet=taskAssigneeRepo.findByUserId(userid);
-        Set<TaskFromTaskassignee> taskAssigned=new HashSet<>();
-        for(TaskAssignee taskAssignee:taskAssigneeSet)
-        {
-            Task task=taskAssignee.getTask();
-            taskAssigned.add(new TaskFromTaskassignee(userid,
-                    task.getId(),
-                    task.getTitle(),
-                    taskAssignee.getStatus(),
-                    task.getCreator(),
-                    task.getCreationTime(),
-                    task.getDeadline(),
-                    task.getDescription()
-            ));
-        }
-        Set<TaskFromCreator> taskCreated=new HashSet<>();
-        List<Task> tasksCreatedbyuserList = taskRepo.findByCreator(userid);
-        //Status =="" then don't show
-        for(Task tasksCreatedbyuser:tasksCreatedbyuserList)
-        {
-
-            List<UserTaskStatus> userTaskStatuses=new ArrayList<>();
-            tasksCreatedbyuser.getTaskAssignees().forEach(taskAssignee1 -> {
-                userTaskStatuses.add(new UserTaskStatus(taskAssignee1.getUser().getUsername(),
-                        taskAssignee1.getUser().getName(),
-                        taskAssignee1.getStatus()
-                )
-                );
-            });
-            taskCreated.add(new TaskFromCreator(userid,
-                    tasksCreatedbyuser.getId(),
-                    tasksCreatedbyuser.getTitle(),
-                    //Either query or load the whole table
-                    "",
-                    tasksCreatedbyuser.getCreator(),
-                    tasksCreatedbyuser.getCreationTime(),
-                    tasksCreatedbyuser.getDeadline(),
-                    tasksCreatedbyuser.getDescription(),
-                    userTaskStatuses
-                    ));
-        }
-
-        Map<String,Object> allTask=new HashMap<String,Object>();
-        allTask.put("created",taskCreated);
-        allTask.put("assigned",taskAssigned);
-        return ResponseEntity.ok().body(allTask);
-    }
-
-    @Override
-    public int updateTaskStatus(Long userid, TaskAssignee taskAssignee) {
-        Optional<Task> taskfromdb=taskRepo.findById(taskAssignee.getTask().getId());
-        if(!taskfromdb.isPresent())
-        {
-            return 1;
-        }
-        if(!userRepo.existsById(userid))
-        {
-            return 2;
-        }
-        Optional<TaskAssignee> taskAssigneefromdb=taskAssigneeRepo.findByUserIdAndTaskId(
-                userid,
-                taskfromdb.get().getId());
-        if(taskAssigneefromdb.isPresent())
-        {
-            taskAssigneefromdb.get().setStatus(taskAssignee.getStatus());
-            taskAssigneeRepo.save(taskAssigneefromdb.get());
-            return 0;
-        }
-        else
-            return 3;
-    }
 
     @Override
     public int deleteUserFromTask(DeleteUserFromTask deleteUserFromTask, Long userid) {
@@ -335,4 +213,149 @@ public class TaskServiceImpl implements TaskService{
         }
         return 0;
     }
+
+    @Override
+    public ResponseEntity<?> findTaskByCreatorid(Long userid) {
+        Optional<User> user=userRepo.findById(userid);
+        if(!user.isPresent())
+        {
+            return ResponseEntity.badRequest().body(userNotFound);
+        }
+        List<Task> tasksCreatedbyuserList = taskRepo.findByCreator(userid);
+        Set<TaskFromCreator> taskCreated=new HashSet<>();
+
+        for(Task tasksCreatedbyuser:tasksCreatedbyuserList)
+        {
+            AtomicBoolean taskCompleted= new AtomicBoolean(true);
+            List<UserTaskStatus> userTaskStatuses=new ArrayList<>();
+            tasksCreatedbyuser.getTaskAssignees().forEach(taskAssignee1 -> {
+                userTaskStatuses.add(new UserTaskStatus(taskAssignee1.getUser().getUsername(),
+                                taskAssignee1.getUser().getName(),
+                                taskAssignee1.getStatus()
+                        )
+                );
+                if(!taskAssignee1.getStatus().equals("Done"))
+                {
+                    taskCompleted.set(false);
+                }
+            });
+            String status;
+            if(taskCompleted.get())
+            {
+                status="Done";
+            }
+            else
+            {
+                status="In progress";
+            }
+            taskCreated.add(new TaskFromCreator(userid,
+                    tasksCreatedbyuser.getId(),
+                    tasksCreatedbyuser.getTitle(),
+                    status,
+                    tasksCreatedbyuser.getCreator(),
+                    tasksCreatedbyuser.getCreationTime(),
+                    tasksCreatedbyuser.getDeadline(),
+                    tasksCreatedbyuser.getDescription(),
+                    userTaskStatuses,
+                    user.get().getName()
+            ));
+        }
+        return ResponseEntity.ok().body(taskCreated);
+    }
+
+    @Override
+    public ResponseEntity<?> getAllTasksByUserid(Long userid) {
+        Optional<User> user=userRepo.findById(userid);
+        if(!user.isPresent())
+        {
+            return ResponseEntity.badRequest().body(userNotFound);
+        }
+
+        List<TaskAssignee> taskAssigneeSet=taskAssigneeRepo.findByUserId(userid);
+        Set<TaskFromTaskassignee> taskAssigned=new HashSet<>();
+        for(TaskAssignee taskAssignee:taskAssigneeSet)
+        {
+            Task task=taskAssignee.getTask();
+            taskAssigned.add(new TaskFromTaskassignee(userid,
+                    task.getId(),
+                    task.getTitle(),
+                    taskAssignee.getStatus(),
+                    task.getCreator(),
+                    task.getCreationTime(),
+                    task.getDeadline(),
+                    task.getDescription(),
+                    userRepo.findById(task.getCreator()).get().getName()
+            ));
+        }
+        Set<TaskFromCreator> taskCreated=new HashSet<>();
+        List<Task> tasksCreatedbyuserList = taskRepo.findByCreator(userid);
+
+        for(Task tasksCreatedbyuser:tasksCreatedbyuserList)
+        {
+            AtomicBoolean taskCompleted= new AtomicBoolean(true);
+            List<UserTaskStatus> userTaskStatuses=new ArrayList<>();
+            tasksCreatedbyuser.getTaskAssignees().forEach(taskAssignee1 -> {
+                userTaskStatuses.add(new UserTaskStatus(taskAssignee1.getUser().getUsername(),
+                                taskAssignee1.getUser().getName(),
+                                taskAssignee1.getStatus()
+                        )
+                );
+                if(!taskAssignee1.getStatus().equals("Done"))
+                {
+                    taskCompleted.set(false);
+                }
+            });
+            String status;
+            if(taskCompleted.get())
+            {
+                status="Done";
+            }
+            else
+            {
+                status="In progress";
+            }
+            taskCreated.add(new TaskFromCreator(userid,
+                    tasksCreatedbyuser.getId(),
+                    tasksCreatedbyuser.getTitle(),
+                    status,
+                    tasksCreatedbyuser.getCreator(),
+                    tasksCreatedbyuser.getCreationTime(),
+                    tasksCreatedbyuser.getDeadline(),
+                    tasksCreatedbyuser.getDescription(),
+                    userTaskStatuses,
+                    user.get().getName()
+            ));
+        }
+
+        Map<String,Object> allTask=new HashMap<String,Object>();
+        allTask.put("created",taskCreated);
+        allTask.put("assigned",taskAssigned);
+        return ResponseEntity.ok().body(allTask);
+    }
+
+    @Override
+    public int updateTaskStatus(Long userid, UserToTask userToTask) {
+        Optional<Task> taskfromdb=taskRepo.findById(userToTask.getTaskId());
+        if(!taskfromdb.isPresent())
+        {
+            return 1;
+        }
+        if(!userRepo.existsById(userid))
+        {
+            return 2;
+        }
+        Optional<TaskAssignee> taskAssigneefromdb=taskAssigneeRepo.findByUserIdAndTaskId(
+                userid,
+                taskfromdb.get().getId());
+        if(taskAssigneefromdb.isPresent())
+        {
+            taskAssigneefromdb.get().setStatus(userToTask.getStatus());
+            taskAssigneeRepo.save(taskAssigneefromdb.get());
+            return 0;
+        }
+        else
+            return 3;
+    }
+
+
 }

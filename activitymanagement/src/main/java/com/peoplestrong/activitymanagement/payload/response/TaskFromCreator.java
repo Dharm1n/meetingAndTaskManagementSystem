@@ -14,12 +14,12 @@ public class TaskFromCreator {
     private LocalDateTime deadline;
     private String description;
     private List<UserTaskStatus> userTaskStatuses=new ArrayList<>();
-
+    private String creatorName;
 
     public TaskFromCreator() {
     }
 
-    public TaskFromCreator(Long userid, Long taskid, String title, String status, Long creator, LocalDateTime creationTime, LocalDateTime deadline, String description, List<UserTaskStatus> userTaskStatuses) {
+    public TaskFromCreator(Long userid, Long taskid, String title, String status, Long creator, LocalDateTime creationTime, LocalDateTime deadline, String description, List<UserTaskStatus> userTaskStatuses, String creatorName) {
         this.userid = userid;
         this.taskid = taskid;
         this.title = title;
@@ -29,6 +29,15 @@ public class TaskFromCreator {
         this.deadline = deadline;
         this.description = description;
         this.userTaskStatuses = userTaskStatuses;
+        this.creatorName = creatorName;
+    }
+
+    public String getCreatorName() {
+        return creatorName;
+    }
+
+    public void setCreatorName(String creatorName) {
+        this.creatorName = creatorName;
     }
 
     public List<UserTaskStatus> getUserTaskStatuses() {
