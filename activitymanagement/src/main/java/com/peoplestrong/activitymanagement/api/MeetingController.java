@@ -6,10 +6,7 @@ import com.peoplestrong.activitymanagement.payload.request.AddMeeting;
 import com.peoplestrong.activitymanagement.payload.request.DeleteUserFromMeeting;
 import com.peoplestrong.activitymanagement.payload.request.UserToMeeting;
 import com.peoplestrong.activitymanagement.payload.request.DeleteMeetingRequest;
-import com.peoplestrong.activitymanagement.payload.response.IdResponse;
-import com.peoplestrong.activitymanagement.payload.response.MeetingNotFound;
-import com.peoplestrong.activitymanagement.payload.response.MessageResponse;
-import com.peoplestrong.activitymanagement.payload.response.UserNotFound;
+import com.peoplestrong.activitymanagement.payload.response.*;
 import com.peoplestrong.activitymanagement.repo.MeetingRepo;
 import com.peoplestrong.activitymanagement.service.MeetingService;
 import com.peoplestrong.activitymanagement.service.UserService;
@@ -43,6 +40,9 @@ public class MeetingController {
 
     @Autowired
     MeetingNotFound meetingNotFound;
+
+    @Autowired
+    NoAuthority noAuthority;
 
 //    --------------   CREATE Meeting   ------------------------------------------------------------------------------------------------
     //Add a meeting
@@ -78,11 +78,11 @@ public class MeetingController {
         else if(status==2)
             return ResponseEntity.badRequest().body(userNotFound);
         else if(status==3)
-            return ResponseEntity.badRequest().body("Error: User is already assigned to that meeting.");
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: User is already assigned to that meeting."));
         else if(status==4)
-            return ResponseEntity.badRequest().body("Error: User is not assigned to that meeting.");
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: User is not assigned to that meeting."));
         else
-            return ResponseEntity.badRequest().body("Some error occurred please try again");
+            return ResponseEntity.badRequest().body(new MessageResponse("Some error occurred please try again"));
 
     }
 
@@ -98,7 +98,7 @@ public class MeetingController {
     public ResponseEntity<?> updateMeeting(@PathVariable(name = "userid") Long userid, @RequestBody Meeting meeting)
     {
         if(!Objects.equals(userid, meeting.getCreator()))
-            return ResponseEntity.badRequest().body("Error: Only creator of the Meeting can change thr creator property.");
+            return ResponseEntity.badRequest().body(noAuthority);
         int status=meetingService.updateMeeting(meeting);
         return returnByStatus(status);
     }
@@ -107,7 +107,7 @@ public class MeetingController {
     public ResponseEntity<?> updateMeetingTime(@PathVariable(name = "userid") Long userid,@RequestBody Meeting meeting)
     {
         if(!Objects.equals(userid, meeting.getCreator()))
-            return ResponseEntity.badRequest().body("Error: Only creator of the Meeting can change thr creator property.");
+            return ResponseEntity.badRequest().body(noAuthority);
         int status=meetingService.updateMeetingTime(meeting);
         return returnByStatus(status);
     }
@@ -117,7 +117,7 @@ public class MeetingController {
     public ResponseEntity<?> updateMeetingDescription(@PathVariable(name = "userid") Long userid,@RequestBody Meeting meeting)
     {
         if(!Objects.equals(userid, meeting.getCreator()))
-            return ResponseEntity.badRequest().body("Error: Only creator of the meeting can change the creator property.");
+            return ResponseEntity.badRequest().body(noAuthority);
         int status=meetingService.updateMeetingDescription(meeting);
         return returnByStatus(status);
     }
@@ -127,7 +127,7 @@ public class MeetingController {
     public ResponseEntity<?> updateMeetingPurpose(@PathVariable(name = "userid") Long userid,@RequestBody Meeting meeting)
     {
         if(!Objects.equals(userid, meeting.getCreator()))
-            return ResponseEntity.badRequest().body("Error: Only creator of the Meeting can change thr creator property.");
+            return ResponseEntity.badRequest().body(noAuthority);
         int status=meetingService.updateMeetingPurpose(meeting);
         return returnByStatus(status);
     }
@@ -137,7 +137,7 @@ public class MeetingController {
     public ResponseEntity<?> updateMeetingPlace(@PathVariable(name = "userid") Long userid,@RequestBody Meeting meeting)
     {
         if(!Objects.equals(userid, meeting.getCreator()))
-            return ResponseEntity.badRequest().body("Error: Only creator of the Meeting can change thr creator property.");
+            return ResponseEntity.badRequest().body(noAuthority);
         int status=meetingService.updateMeetingPlace(meeting);
         return returnByStatus(status);
     }
@@ -162,9 +162,9 @@ public class MeetingController {
         else if(status==1)
             return ResponseEntity.badRequest().body(meetingNotFound);
         else if(status==2)
-            return ResponseEntity.badRequest().body("Error: Only meeting creator can delete the meeting");
+            return ResponseEntity.badRequest().body(noAuthority);
         else
-            return ResponseEntity.badRequest().body("Some error occurred please try again");
+            return ResponseEntity.badRequest().body(new MessageResponse("Some error occurred please try again"));
     }
 
     @DeleteMapping("/meeting/user/{userid}")
@@ -176,7 +176,7 @@ public class MeetingController {
         else if(status==1)
             return ResponseEntity.badRequest().body(meetingNotFound);
         else if(status==2)
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: Only creator can delete the meeting"));
+            return ResponseEntity.badRequest().body(noAuthority);
         else if(status==3)
             return ResponseEntity.badRequest().body(userNotFound);
         else if(status==4)

@@ -371,7 +371,6 @@ public class MeetingServiceImpl implements MeetingService{
         String orgName=username.substring(orgStartIndex);
 
         List<User> usersfromdb=userRepo.findByUsernameEndsWith(orgName);
-        List<MeetingAttendee> meetingAttendeesfromdb=meetingAttendeeRepo.findByMeetingId(meetingId);
 
         List<UserNameEmail> userNameEmailsList=new ArrayList<>();
 
