@@ -40,7 +40,7 @@ public class MeetingServiceImpl implements MeetingService{
     NoAuthority noAuthority;
 
     @Override
-    public int addUserToMeeting(UserToMeeting userToMeeting) {
+    public int addUserToMeeting(Long userid,UserToMeeting userToMeeting) {
         Optional<MeetingAttendee> meetingAttendee=meetingAttendeeRepo.findByMeetingIdAndUserId(userToMeeting.getMeetingId(),userToMeeting.getUserId());
         Optional<User> user=userRepo.findById(userToMeeting.getUserId());
         Optional<Meeting> meeting=meetingRepo.findById(userToMeeting.getMeetingId());
@@ -78,7 +78,7 @@ public class MeetingServiceImpl implements MeetingService{
     }
 
     @Override
-    public int updateMeeting(Meeting meeting) {
+    public int updateMeeting(Long userid,Meeting meeting) {
         Optional<Meeting> meetingfromdb=meetingRepo.findById(meeting.getId());
 
         if(!meetingfromdb.isPresent())
@@ -89,7 +89,10 @@ public class MeetingServiceImpl implements MeetingService{
         {
             return 2;
         }
-
+        if(!Objects.equals(userid, meetingfromdb.get().getCreator()))
+        {
+            return 5;
+        }
         meetingfromdb.get().setCreator(meeting.getCreator());
         meetingfromdb.get().setMeetingTime(meeting.getMeetingTime());
         meetingfromdb.get().setDescription(meeting.getDescription());
@@ -102,7 +105,7 @@ public class MeetingServiceImpl implements MeetingService{
     }
 
     @Override
-    public int updateMeetingTime(Meeting meeting) {
+    public int updateMeetingTime(Long userid,Meeting meeting) {
         Optional<Meeting> meetingfromdb=meetingRepo.findById(meeting.getId());
 
         if(!meetingfromdb.isPresent())
@@ -112,6 +115,10 @@ public class MeetingServiceImpl implements MeetingService{
         if(!userRepo.existsById(meeting.getCreator()))
         {
             return 2;
+        }
+        if(!Objects.equals(userid, meetingfromdb.get().getCreator()))
+        {
+            return 5;
         }
         meetingfromdb.get().setMeetingTime(meeting.getMeetingTime());
         meetingRepo.save(meetingfromdb.get());
@@ -120,7 +127,7 @@ public class MeetingServiceImpl implements MeetingService{
     }
 
     @Override
-    public int updateMeetingDescription(Meeting meeting) {
+    public int updateMeetingDescription(Long userid,Meeting meeting) {
         Optional<Meeting> meetingfromdb=meetingRepo.findById(meeting.getId());
 
         if(!meetingfromdb.isPresent())
@@ -130,6 +137,10 @@ public class MeetingServiceImpl implements MeetingService{
         if(!userRepo.existsById(meeting.getCreator()))
         {
             return 2;
+        }
+        if(!Objects.equals(userid, meetingfromdb.get().getCreator()))
+        {
+            return 5;
         }
         meetingfromdb.get().setDescription(meeting.getDescription());
         meetingRepo.save(meetingfromdb.get());
@@ -138,7 +149,7 @@ public class MeetingServiceImpl implements MeetingService{
     }
 
     @Override
-    public int updateMeetingPurpose(Meeting meeting) {
+    public int updateMeetingPurpose(Long userid,Meeting meeting) {
         Optional<Meeting> meetingfromdb=meetingRepo.findById(meeting.getId());
 
         if(!meetingfromdb.isPresent())
@@ -148,6 +159,10 @@ public class MeetingServiceImpl implements MeetingService{
         if(!userRepo.existsById(meeting.getCreator()))
         {
             return 2;
+        }
+        if(!Objects.equals(userid, meetingfromdb.get().getCreator()))
+        {
+            return 5;
         }
         meetingfromdb.get().setPurpose(meeting.getPurpose());
         meetingRepo.save(meetingfromdb.get());
@@ -156,7 +171,7 @@ public class MeetingServiceImpl implements MeetingService{
     }
 
     @Override
-    public int updateMeetingPlace(Meeting meeting) {
+    public int updateMeetingPlace(Long userid,Meeting meeting) {
         Optional<Meeting> meetingfromdb=meetingRepo.findById(meeting.getId());
 
         if(!meetingfromdb.isPresent())
@@ -166,6 +181,10 @@ public class MeetingServiceImpl implements MeetingService{
         if(!userRepo.existsById(meeting.getCreator()))
         {
             return 2;
+        }
+        if(!Objects.equals(userid, meetingfromdb.get().getCreator()))
+        {
+            return 5;
         }
         meetingfromdb.get().setPlace(meeting.getPlace());
         meetingRepo.save(meetingfromdb.get());
@@ -188,6 +207,8 @@ public class MeetingServiceImpl implements MeetingService{
                 meetingfromdb.get().getId(),
                 userid
                 );
+        if(!Objects.equals(meetingfromdb.get().getCreator(), userid))
+            return 5;
         if(meetingAttendeefromdb.isPresent())
         {
             meetingAttendeefromdb.get().setStatus(userToMeeting.getStatus());
@@ -206,7 +227,7 @@ public class MeetingServiceImpl implements MeetingService{
         {
             return 1;
         }
-        if(meeting.get().getCreator()!=userid)
+        if(!Objects.equals(meeting.get().getCreator(), userid))
             return 2;
         meetingRepo.deleteById(meetingId);
         return 0;

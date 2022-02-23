@@ -63,7 +63,7 @@ public class MeetingController {
         URI uri= URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/meeting").toUriString());
         for(Long userid:addMeeting.getMeetingAttendees())
         {
-            addUserToMeeting(new UserToMeeting(userid,meeting.getId(),"Not responded"));
+            addUserToMeeting(addMeeting.getCreator(),new UserToMeeting(userid,meeting.getId(),"Not responded"));
         }
         return ResponseEntity.created(uri).body(new IdResponse(meeting.getId()));
     }
@@ -81,34 +81,32 @@ public class MeetingController {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: User is already assigned to that meeting."));
         else if(status==4)
             return ResponseEntity.badRequest().body(new MessageResponse("Error: User is not assigned to that meeting."));
+        else if(status==5)
+            return ResponseEntity.badRequest().body(noAuthority);
         else
             return ResponseEntity.badRequest().body(new MessageResponse("Some error occurred please try again"));
 
     }
 
     //Add a user to Meeting
-    @PostMapping("/meeting/adduser")
-    public ResponseEntity<?> addUserToMeeting(@RequestBody UserToMeeting userToMeeting)
+    @PostMapping("/meeting/adduser/{userid}")
+    public ResponseEntity<?> addUserToMeeting(@PathVariable Long userid,@RequestBody UserToMeeting userToMeeting)
     {
-        int status=meetingService.addUserToMeeting(userToMeeting);
+        int status=meetingService.addUserToMeeting(userid,userToMeeting);
         return returnByStatus(status);
     }
 
     @PutMapping("/meeting/{userid}")
     public ResponseEntity<?> updateMeeting(@PathVariable(name = "userid") Long userid, @RequestBody Meeting meeting)
     {
-        if(!Objects.equals(userid, meeting.getCreator()))
-            return ResponseEntity.badRequest().body(noAuthority);
-        int status=meetingService.updateMeeting(meeting);
+        int status=meetingService.updateMeeting(userid,meeting);
         return returnByStatus(status);
     }
 
     @PutMapping("/meeting/meetingtime/{userid}")
     public ResponseEntity<?> updateMeetingTime(@PathVariable(name = "userid") Long userid,@RequestBody Meeting meeting)
     {
-        if(!Objects.equals(userid, meeting.getCreator()))
-            return ResponseEntity.badRequest().body(noAuthority);
-        int status=meetingService.updateMeetingTime(meeting);
+        int status=meetingService.updateMeetingTime(userid,meeting);
         return returnByStatus(status);
     }
 
@@ -116,9 +114,7 @@ public class MeetingController {
     @PutMapping("/meeting/description/{userid}")
     public ResponseEntity<?> updateMeetingDescription(@PathVariable(name = "userid") Long userid,@RequestBody Meeting meeting)
     {
-        if(!Objects.equals(userid, meeting.getCreator()))
-            return ResponseEntity.badRequest().body(noAuthority);
-        int status=meetingService.updateMeetingDescription(meeting);
+        int status=meetingService.updateMeetingDescription(userid,meeting);
         return returnByStatus(status);
     }
 
@@ -126,9 +122,7 @@ public class MeetingController {
     @PutMapping("/meeting/purpose/{userid}")
     public ResponseEntity<?> updateMeetingPurpose(@PathVariable(name = "userid") Long userid,@RequestBody Meeting meeting)
     {
-        if(!Objects.equals(userid, meeting.getCreator()))
-            return ResponseEntity.badRequest().body(noAuthority);
-        int status=meetingService.updateMeetingPurpose(meeting);
+        int status=meetingService.updateMeetingPurpose(userid,meeting);
         return returnByStatus(status);
     }
 
@@ -136,9 +130,7 @@ public class MeetingController {
     @PutMapping("/meeting/place/{userid}")
     public ResponseEntity<?> updateMeetingPlace(@PathVariable(name = "userid") Long userid,@RequestBody Meeting meeting)
     {
-        if(!Objects.equals(userid, meeting.getCreator()))
-            return ResponseEntity.badRequest().body(noAuthority);
-        int status=meetingService.updateMeetingPlace(meeting);
+        int status=meetingService.updateMeetingPlace(userid,meeting);
         return returnByStatus(status);
     }
 

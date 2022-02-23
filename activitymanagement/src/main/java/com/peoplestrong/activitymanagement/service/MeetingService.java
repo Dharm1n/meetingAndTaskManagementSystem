@@ -7,17 +7,17 @@ import com.peoplestrong.activitymanagement.payload.request.UserToMeeting;
 import org.springframework.http.ResponseEntity;
 
 public interface MeetingService {
-    int addUserToMeeting(UserToMeeting userToMeeting);
+    int addUserToMeeting(Long userid,UserToMeeting userToMeeting);
 
-    int updateMeeting(Meeting meeting);
+    int updateMeeting(Long userid,Meeting meeting);
 
-    int updateMeetingTime(Meeting meeting);
+    int updateMeetingTime(Long userid,Meeting meeting);
 
-    int updateMeetingDescription(Meeting meeting);
+    int updateMeetingDescription(Long userid,Meeting meeting);
 
-    int updateMeetingPurpose(Meeting meeting);
+    int updateMeetingPurpose(Long userid,Meeting meeting);
 
-    int updateMeetingPlace(Meeting meeting);
+    int updateMeetingPlace(Long userid,Meeting meeting);
 
     int updateMeetingStatus(Long userid, UserToMeeting userToMeeting);
 
