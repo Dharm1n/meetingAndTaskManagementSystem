@@ -9,19 +9,19 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 public interface TaskService {
-    int addUserToTask(UserToTask userToTask);
+    int addUserToTask(Long userid,UserToTask userToTask);
 
-    int updateTask(Task task);
+    int updateTask(Long userid,Task task);
 
-    int updateTaskCreator(Task task);
+    int updateTaskCreator(Long userid,Task task);
 
-    int updateTaskDeadline(Task task);
+    int updateTaskDeadline(Long userid,Task task);
 
-    int updateTaskTitle(Task task);
+    int updateTaskTitle(Long userid,Task task);
 
-    int updateTaskDescription(Task task);
+    int updateTaskDescription(Long userid,Task task);
 
-    int deleteTaskById(Long taskid);
+    int deleteTaskById(Long userid,Long taskid);
 
     ResponseEntity<?> findTaskByCreatorid(Long userid);
 

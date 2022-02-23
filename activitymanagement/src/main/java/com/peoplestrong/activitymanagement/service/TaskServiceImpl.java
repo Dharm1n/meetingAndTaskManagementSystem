@@ -42,7 +42,7 @@ public class TaskServiceImpl implements TaskService{
     NoAuthority noAuthority;
 
     @Override
-    public int addUserToTask(UserToTask userToTask) {
+    public int addUserToTask(Long userid,UserToTask userToTask) {
         Optional<TaskAssignee> taskAssignee=taskAssigneeRepo.findByUserIdAndTaskId(userToTask.getUserId(),userToTask.getTaskId());
         Optional<User> user=userRepo.findById(userToTask.getUserId());
         Optional<Task> task=taskRepo.findById(userToTask.getTaskId());
@@ -51,7 +51,7 @@ public class TaskServiceImpl implements TaskService{
             log.error("User is already assigned to task");
             return 3;
         }
-        if(!user.isPresent())
+        if(!user.isPresent() || !userRepo.existsById(userid))
         {
             log.error("User not found in db");
             //throw new UsernameNotFoundException("User does not exist.");
@@ -63,6 +63,8 @@ public class TaskServiceImpl implements TaskService{
             //throw new UsernameNotFoundException("Task doesn't exist.");
             return 1;
         }
+        if(!Objects.equals(userid, task.get().getCreator()))
+            return 4;
         log.error("{}",taskRepo.findById(userToTask.getTaskId()).get().toString());
 
         try{
@@ -83,7 +85,7 @@ public class TaskServiceImpl implements TaskService{
     }
 
     @Override
-    public int updateTask(Task task) {
+    public int updateTask(Long userid,Task task) {
         Optional<Task> taskfromdb=taskRepo.findById(task.getId());
 
         if(!taskfromdb.isPresent())
@@ -106,7 +108,7 @@ public class TaskServiceImpl implements TaskService{
     }
 
     @Override
-    public int updateTaskCreator(Task task) {
+    public int updateTaskCreator(Long userid,Task task) {
         Optional<Task> taskfromdb=taskRepo.findById(task.getId());
         if(!taskfromdb.isPresent())
         {
@@ -116,6 +118,8 @@ public class TaskServiceImpl implements TaskService{
         {
             return 2;
         }
+        if(!Objects.equals(taskfromdb.get().getCreator(), userid))
+            return 4;
         taskfromdb.get().setCreator(task.getCreator());
         taskRepo.save(taskfromdb.get());
 
@@ -123,7 +127,7 @@ public class TaskServiceImpl implements TaskService{
     }
 
     @Override
-    public int updateTaskDeadline(Task task) {
+    public int updateTaskDeadline(Long userid,Task task) {
         Optional<Task> taskfromdb=taskRepo.findById(task.getId());
         if(!taskfromdb.isPresent())
         {
@@ -133,13 +137,15 @@ public class TaskServiceImpl implements TaskService{
         {
             return 2;
         }
+        if(!Objects.equals(taskfromdb.get().getCreator(), userid))
+            return 4;
         taskfromdb.get().setDeadline(task.getDeadline());
         taskRepo.save(taskfromdb.get());
         return 0;
     }
 
     @Override
-    public int updateTaskTitle(Task task) {
+    public int updateTaskTitle(Long userid,Task task) {
         Optional<Task> taskfromdb=taskRepo.findById(task.getId());
         if(!taskfromdb.isPresent())
         {
@@ -149,13 +155,15 @@ public class TaskServiceImpl implements TaskService{
         {
             return 2;
         }
+        if(!Objects.equals(taskfromdb.get().getCreator(), userid))
+            return 4;
         taskfromdb.get().setTitle(task.getTitle());
         taskRepo.save(taskfromdb.get());
         return 0;
     }
 
     @Override
-    public int updateTaskDescription(Task task) {
+    public int updateTaskDescription(Long userid,Task task) {
         Optional<Task> taskfromdb=taskRepo.findById(task.getId());
         if(!taskfromdb.isPresent())
         {
@@ -165,18 +173,22 @@ public class TaskServiceImpl implements TaskService{
         {
             return 2;
         }
+        if(!Objects.equals(taskfromdb.get().getCreator(), userid))
+            return 4;
         taskfromdb.get().setDescription(task.getDescription());
         taskRepo.save(taskfromdb.get());
         return 0;
     }
 
     @Override
-    public int deleteTaskById(Long taskid) {
+    public int deleteTaskById(Long userid,Long taskid) {
         Optional<Task> task=taskRepo.findById(taskid);
         if(!task.isPresent())
         {
             return 1;
         }
+        if(!Objects.equals(task.get().getCreator(), userid))
+            return 4;
         taskRepo.deleteById(taskid);
         return 0;
     }

@@ -56,7 +56,7 @@ public class TaskController {
 
         for(Long userid:addTask.getTaskAssignees())
         {
-            addUserToTask(new UserToTask(userid,
+            addUserToTask(addTask.getCreator(),new UserToTask(userid,
                     task.getId(),
                     "To do"
             ));
@@ -76,24 +76,24 @@ public class TaskController {
             return ResponseEntity.badRequest().body(userNotFound);
         else if(status==3)
             return ResponseEntity.badRequest().body(new MessageResponse("Error: User is already assigned to that task."));
+        else if(status==4)
+            return ResponseEntity.badRequest().body(noAuthority);
         else
             return ResponseEntity.badRequest().body(new MessageResponse("Some error occurred please try again"));
 
     }
 
-    @PostMapping("/task/adduser")
-    public ResponseEntity<?> addUserToTask(@RequestBody UserToTask userToTask)
+    @PostMapping("/task/adduser/{userid}")
+    public ResponseEntity<?> addUserToTask(@PathVariable(name = "userid") Long userid,@RequestBody UserToTask userToTask)
     {
-        int status=taskService.addUserToTask(userToTask);
+        int status=taskService.addUserToTask(userid,userToTask);
         return returnByStatus(status);
     }
 
     @PutMapping("/task/{userid}")
     public ResponseEntity<?> updateTask(@PathVariable(name = "userid") Long userid,@RequestBody Task task)
     {
-        if(!Objects.equals(userid, task.getCreator()))
-            return ResponseEntity.badRequest().body(noAuthority);
-        int status=taskService.updateTask(task);
+        int status=taskService.updateTask(userid,task);
         return returnByStatus(status);
     }
 
@@ -101,9 +101,7 @@ public class TaskController {
     @PutMapping("/task/creator/{userid}")
     public ResponseEntity<?> updateTaskCreator(@PathVariable(name = "userid") Long userid,@RequestBody Task task)
     {
-        if(!Objects.equals(userid, task.getCreator()))
-            return ResponseEntity.badRequest().body(noAuthority);
-        int status=taskService.updateTaskCreator(task);
+        int status=taskService.updateTaskCreator(userid,task);
         return returnByStatus(status);
     }
 
@@ -111,18 +109,14 @@ public class TaskController {
     @PutMapping("/task/deadline/{userid}")
     public ResponseEntity<?> updateTaskDeadline(@PathVariable(name = "userid") Long userid,@RequestBody Task task)
     {
-        if(!Objects.equals(userid, task.getCreator()))
-            return ResponseEntity.badRequest().body(noAuthority);
-        int status=taskService.updateTaskDeadline(task);
+        int status=taskService.updateTaskDeadline(userid,task);
         return returnByStatus(status);
     }
 
     @PutMapping("/task/description/{userid}")
     public ResponseEntity<?> updateTaskDescription(@PathVariable(name = "userid") Long userid,@RequestBody Task task)
     {
-        if(!Objects.equals(userid, task.getCreator()))
-            return ResponseEntity.badRequest().body(noAuthority);
-        int status=taskService.updateTaskDescription(task);
+        int status=taskService.updateTaskDescription(userid,task);
         return returnByStatus(status);
     }
 
@@ -130,9 +124,7 @@ public class TaskController {
     @PutMapping("/task/title/{userid}")
     public ResponseEntity<?> updateTaskTitle(@PathVariable(name = "userid") Long userid,@RequestBody Task task)
     {
-        if(!Objects.equals(userid, task.getCreator()))
-            return ResponseEntity.badRequest().body(noAuthority);
-        int status=taskService.updateTaskTitle(task);
+        int status=taskService.updateTaskTitle(userid,task);
         return returnByStatus(status);
     }
 
@@ -149,13 +141,13 @@ public class TaskController {
     @DeleteMapping("/task/{userid}")
     public ResponseEntity<?> deleteTaskById(@PathVariable(name = "userid") Long userid, @RequestBody DeleteTaskRequest deleteTaskRequest)
     {
-        if(!Objects.equals(userid, deleteTaskRequest.getCreatorId()))
-            return ResponseEntity.badRequest().body(noAuthority);
-        int status=taskService.deleteTaskById(deleteTaskRequest.getTaskId());
+        int status=taskService.deleteTaskById(userid,deleteTaskRequest.getTaskId());
         if(status==0)
             return ResponseEntity.ok().build();
         else if(status==1)
             return ResponseEntity.badRequest().body(taskNotFound);
+        else if(status==4)
+            return ResponseEntity.badRequest().body(noAuthority);
         else
             return ResponseEntity.badRequest().body(new MessageResponse("Some error occurred please try again"));
     }

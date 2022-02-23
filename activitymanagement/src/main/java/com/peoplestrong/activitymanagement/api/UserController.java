@@ -14,13 +14,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.*;
 
-@RestController @RequiredArgsConstructor @RequestMapping("/api") @Slf4j
+@RestController @RequiredArgsConstructor @RequestMapping("/api") @Slf4j @PreAuthorize("hasRole('ROLE_USER')")
 public class UserController {
     @Autowired
     private final UserService userService;
@@ -30,6 +31,8 @@ public class UserController {
 
     @Autowired
     private RoleRepo roleRepo;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @GetMapping("/users/{username}")
     public ResponseEntity<?> getUsers(@PathVariable("username") String username) {
@@ -80,6 +83,7 @@ public class UserController {
         Collection<Role> roles=new ArrayList<>();
         Role userRole=roleRepo.findByName("ROLE_USER").orElseThrow(() ->new RuntimeException("Role Doesn't exist"));
         roles.add(userRole);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRoles(roles);
         userRepo.save(user);
         return ResponseEntity.created(uri).body(new IdResponse(user.getId()));
