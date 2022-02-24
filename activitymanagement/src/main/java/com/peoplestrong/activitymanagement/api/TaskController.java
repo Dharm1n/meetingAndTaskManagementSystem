@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
-@RestController @RequiredArgsConstructor @RequestMapping("/api") @Slf4j @PreAuthorize("hasRole('ROLE_USER')") @Transactional
+@RestController @RequiredArgsConstructor @RequestMapping("/api") @Slf4j
 public class TaskController {
 
     @Autowired

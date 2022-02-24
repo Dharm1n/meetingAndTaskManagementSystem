@@ -16,8 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpMethod.*;
 import static org.springframework.security.config.http.SessionCreationPolicy.*;
 
 
@@ -38,8 +37,10 @@ public class securityConfig extends WebSecurityConfigurerAdapter {
         http.sessionManagement().sessionCreationPolicy(STATELESS);
 
         http.authorizeRequests().antMatchers(POST,"/api/users/save","/api/role/save","/api/login").permitAll();
-        http.authorizeRequests().antMatchers(GET,"/api/user/**").hasAnyAuthority("ROLE_USER");
-        http.authorizeRequests().antMatchers(POST,"/api/task/**").hasAnyAuthority("ROLE_USER");
+        http.authorizeRequests().antMatchers(GET,"/api/**").hasAnyAuthority("ROLE_USER");
+        http.authorizeRequests().antMatchers(POST,"/api/**").hasAnyAuthority("ROLE_USER");
+        http.authorizeRequests().antMatchers(PUT,"/api/**").hasAnyAuthority("ROLE_USER");
+        http.authorizeRequests().antMatchers(DELETE,"/api/**").hasAnyAuthority("ROLE_USER");
         http.authorizeRequests().anyRequest().authenticated();
 //        http.authorizeRequests().anyRequest().permitAll();
         http.addFilter(customAuthenticationFilter);
