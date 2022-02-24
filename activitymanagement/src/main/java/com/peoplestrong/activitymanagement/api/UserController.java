@@ -34,8 +34,8 @@ public class UserController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @GetMapping("/users/{username}")
-    public ResponseEntity<?> getUsers(@PathVariable("username") String username) {
+    @GetMapping("/users")
+    public ResponseEntity<?> getUsers(@RequestParam("username") String username) {
         log.error("{}",username);
         if(!userRepo.existsByUsername(username))
         {
@@ -89,8 +89,8 @@ public class UserController {
         return ResponseEntity.created(uri).body(new IdResponse(user.getId()));
     }
 
-    @GetMapping("/user/{username}")
-    public ResponseEntity<?> getUserIdByUsername(@PathVariable(name = "username") String username)
+    @GetMapping("/user")
+    public ResponseEntity<?> getUserIdByUsername(@RequestParam(name = "username") String username)
     {
         return userService.getUserIdByUsername(username);
     }

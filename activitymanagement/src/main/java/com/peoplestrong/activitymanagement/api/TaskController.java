@@ -83,54 +83,54 @@ public class TaskController {
 
     }
 
-    @PostMapping("/task/adduser/{userid}")
-    public ResponseEntity<?> addUserToTask(@PathVariable(name = "userid") Long userid,@RequestBody UserToTask userToTask)
+    @PostMapping("/task/adduser")
+    public ResponseEntity<?> addUserToTask(@RequestParam(name = "userid") Long userid,@RequestBody UserToTask userToTask)
     {
         int status=taskService.addUserToTask(userid,userToTask);
         return returnByStatus(status);
     }
 
-    @PutMapping("/task/{userid}")
-    public ResponseEntity<?> updateTask(@PathVariable(name = "userid") Long userid,@RequestBody Task task)
+    @PutMapping("/task")
+    public ResponseEntity<?> updateTask(@RequestParam(name = "userid") Long userid,@RequestBody Task task)
     {
         int status=taskService.updateTask(userid,task);
         return returnByStatus(status);
     }
 
 
-    @PutMapping("/task/creator/{userid}")
-    public ResponseEntity<?> updateTaskCreator(@PathVariable(name = "userid") Long userid,@RequestBody Task task)
+    @PutMapping("/task/creator")
+    public ResponseEntity<?> updateTaskCreator(@RequestParam(name = "userid") Long userid,@RequestBody Task task)
     {
         int status=taskService.updateTaskCreator(userid,task);
         return returnByStatus(status);
     }
 
 
-    @PutMapping("/task/deadline/{userid}")
-    public ResponseEntity<?> updateTaskDeadline(@PathVariable(name = "userid") Long userid,@RequestBody Task task)
+    @PutMapping("/task/deadline")
+    public ResponseEntity<?> updateTaskDeadline(@RequestParam(name = "userid") Long userid,@RequestBody Task task)
     {
         int status=taskService.updateTaskDeadline(userid,task);
         return returnByStatus(status);
     }
 
-    @PutMapping("/task/description/{userid}")
-    public ResponseEntity<?> updateTaskDescription(@PathVariable(name = "userid") Long userid,@RequestBody Task task)
+    @PutMapping("/task/description")
+    public ResponseEntity<?> updateTaskDescription(@RequestParam(name = "userid") Long userid,@RequestBody Task task)
     {
         int status=taskService.updateTaskDescription(userid,task);
         return returnByStatus(status);
     }
 
 
-    @PutMapping("/task/title/{userid}")
-    public ResponseEntity<?> updateTaskTitle(@PathVariable(name = "userid") Long userid,@RequestBody Task task)
+    @PutMapping("/task/title")
+    public ResponseEntity<?> updateTaskTitle(@RequestParam(name = "userid") Long userid,@RequestBody Task task)
     {
         int status=taskService.updateTaskTitle(userid,task);
         return returnByStatus(status);
     }
 
 
-    @PutMapping("/task/status/{userid}")
-    public ResponseEntity<?> updateTaskStatus(@PathVariable(name = "userid") Long userid,@RequestBody UserToTask userToTask)
+    @PutMapping("/task/status")
+    public ResponseEntity<?> updateTaskStatus(@RequestParam(name = "userid") Long userid,@RequestBody UserToTask userToTask)
     {
         int status=taskService.updateTaskStatus(userid,userToTask);
         return returnByStatus(status);
@@ -138,8 +138,8 @@ public class TaskController {
 
 //   ----------------   DELETE TASK ------------------------------------------------------------------------------------------------
     //Delete a task by id
-    @DeleteMapping("/task/{userid}")
-    public ResponseEntity<?> deleteTaskById(@PathVariable(name = "userid") Long userid, @RequestBody DeleteTaskRequest deleteTaskRequest)
+    @DeleteMapping("/task")
+    public ResponseEntity<?> deleteTaskById(@RequestParam(name = "userid") Long userid, @RequestBody DeleteTaskRequest deleteTaskRequest)
     {
         int status=taskService.deleteTaskById(userid,deleteTaskRequest.getTaskId());
         if(status==0)
@@ -152,8 +152,8 @@ public class TaskController {
             return ResponseEntity.badRequest().body(new MessageResponse("Some error occurred please try again"));
     }
 
-    @DeleteMapping("/task/user/{userid}")
-    public ResponseEntity<?> deleteUserFromMeeting(@PathVariable(name = "userid") Long userid, @RequestBody DeleteUserFromTask deleteUserFromTask)
+    @DeleteMapping("/task/user")
+    public ResponseEntity<?> deleteUserFromMeeting(@RequestParam(name = "userid") Long userid, @RequestBody DeleteUserFromTask deleteUserFromTask)
     {
         int status=taskService.deleteUserFromTask(deleteUserFromTask,userid);
         if(status==0)
@@ -171,20 +171,20 @@ public class TaskController {
 
     }
 //   ----------------   READ TASK ------------------------------------------------------------------------------------------------
-    @GetMapping("/task/creator/{userid}")
-    public ResponseEntity<?> getTasksCreatedBy(@PathVariable(name = "userid") Long userid)
+    @GetMapping("/task/creator")
+    public ResponseEntity<?> getTasksCreatedBy(@RequestParam(name = "userid") Long userid)
     {
         return taskService.findTaskByCreatorid(userid);
     }
 
     @GetMapping("/task/noninvited")
-    public ResponseEntity<?> findAllNonInvitedUsers(@RequestParam Long userId,@RequestParam Long taskId)
+    public ResponseEntity<?> findAllNonInvitedUsers(@RequestParam(name = "userid") Long userid,@RequestParam Long taskId)
     {
-        return taskService.findAllNonInvitedUsers(userId,taskId);
+        return taskService.findAllNonInvitedUsers(userid,taskId);
     }
 
-    @GetMapping("/task/user/{userid}")
-    public ResponseEntity<?> getAllTasksByUserid(@PathVariable(name = "userid") Long userid)
+    @GetMapping("/task/user")
+    public ResponseEntity<?> getAllTasksByUserid(@RequestParam(name = "userid") Long userid)
     {
         return taskService.getAllTasksByUserid(userid);
     }

@@ -24,7 +24,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.Optional;
 
-@RestController @RequiredArgsConstructor @RequestMapping("/api") @Slf4j @PreAuthorize("hasRole('ROLE_USER')")
+@RestController @RequiredArgsConstructor @RequestMapping("/api") @Slf4j
 public class MeetingController {
     @Autowired
     MeetingService meetingService;
@@ -89,53 +89,53 @@ public class MeetingController {
     }
 
     //Add a user to Meeting
-    @PostMapping("/meeting/adduser/{userid}")
-    public ResponseEntity<?> addUserToMeeting(@PathVariable Long userid,@RequestBody UserToMeeting userToMeeting)
+    @PostMapping("/meeting/adduser")
+    public ResponseEntity<?> addUserToMeeting(@RequestParam(name = "userid") Long userid,@RequestBody UserToMeeting userToMeeting)
     {
         int status=meetingService.addUserToMeeting(userid,userToMeeting);
         return returnByStatus(status);
     }
 
-    @PutMapping("/meeting/{userid}")
-    public ResponseEntity<?> updateMeeting(@PathVariable(name = "userid") Long userid, @RequestBody Meeting meeting)
+    @PutMapping("/meeting")
+    public ResponseEntity<?> updateMeeting(@RequestParam(name = "userid") Long userid, @RequestBody Meeting meeting)
     {
         int status=meetingService.updateMeeting(userid,meeting);
         return returnByStatus(status);
     }
 
-    @PutMapping("/meeting/meetingtime/{userid}")
-    public ResponseEntity<?> updateMeetingTime(@PathVariable(name = "userid") Long userid,@RequestBody Meeting meeting)
+    @PutMapping("/meeting/meetingtime")
+    public ResponseEntity<?> updateMeetingTime(@RequestParam(name = "userid") Long userid,@RequestBody Meeting meeting)
     {
         int status=meetingService.updateMeetingTime(userid,meeting);
         return returnByStatus(status);
     }
 
 
-    @PutMapping("/meeting/description/{userid}")
-    public ResponseEntity<?> updateMeetingDescription(@PathVariable(name = "userid") Long userid,@RequestBody Meeting meeting)
+    @PutMapping("/meeting/description")
+    public ResponseEntity<?> updateMeetingDescription(@RequestParam(name = "userid") Long userid,@RequestBody Meeting meeting)
     {
         int status=meetingService.updateMeetingDescription(userid,meeting);
         return returnByStatus(status);
     }
 
 
-    @PutMapping("/meeting/purpose/{userid}")
-    public ResponseEntity<?> updateMeetingPurpose(@PathVariable(name = "userid") Long userid,@RequestBody Meeting meeting)
+    @PutMapping("/meeting/purpose")
+    public ResponseEntity<?> updateMeetingPurpose(@RequestParam(name = "userid") Long userid,@RequestBody Meeting meeting)
     {
         int status=meetingService.updateMeetingPurpose(userid,meeting);
         return returnByStatus(status);
     }
 
 
-    @PutMapping("/meeting/place/{userid}")
-    public ResponseEntity<?> updateMeetingPlace(@PathVariable(name = "userid") Long userid,@RequestBody Meeting meeting)
+    @PutMapping("/meeting/place")
+    public ResponseEntity<?> updateMeetingPlace(@RequestParam(name = "userid") Long userid,@RequestBody Meeting meeting)
     {
         int status=meetingService.updateMeetingPlace(userid,meeting);
         return returnByStatus(status);
     }
 
-    @PutMapping("/meeting/status/{userid}")
-    public ResponseEntity<?> updateMeetingStatus(@PathVariable(name = "userid") Long userid, @RequestBody UserToMeeting userToMeeting)
+    @PutMapping("/meeting/status")
+    public ResponseEntity<?> updateMeetingStatus(@RequestParam(name = "userid") Long userid, @RequestBody UserToMeeting userToMeeting)
     {
         int status=meetingService.updateMeetingStatus(userid,userToMeeting);
         return returnByStatus(status);
@@ -145,8 +145,8 @@ public class MeetingController {
     //   ----------------   DELETE Meeting ------------------------------------------------------------------------------------------------
     //Delete a meeting by id
 
-    @DeleteMapping("/meeting/{userid}")
-    public ResponseEntity<?> deleteMeetingById(@PathVariable(name = "userid") Long userid, @RequestBody DeleteMeetingRequest deleteMeetingRequest)
+    @DeleteMapping("/meeting")
+    public ResponseEntity<?> deleteMeetingById(@RequestParam(name = "userid") Long userid, @RequestBody DeleteMeetingRequest deleteMeetingRequest)
     {
         int status=meetingService.deleteMeetingById(deleteMeetingRequest.getMeetingId(),userid);
         if(status==0)
@@ -159,8 +159,8 @@ public class MeetingController {
             return ResponseEntity.badRequest().body(new MessageResponse("Some error occurred please try again"));
     }
 
-    @DeleteMapping("/meeting/user/{userid}")
-    public ResponseEntity<?> deleteUserFromMeeting(@PathVariable(name = "userid") Long userid, @RequestBody DeleteUserFromMeeting deleteUserFromMeeting)
+    @DeleteMapping("/meeting/user")
+    public ResponseEntity<?> deleteUserFromMeeting(@RequestParam(name = "userid") Long userid, @RequestBody DeleteUserFromMeeting deleteUserFromMeeting)
     {
         int status=meetingService.deleteUserFromMeeting(deleteUserFromMeeting,userid);
         if(status==0)
@@ -179,19 +179,19 @@ public class MeetingController {
     }
 
     //   ----------------   READ Meeting ------------------------------------------------------------------------------------------------
-    @GetMapping("/meeting/creator/{userid}")
-    public ResponseEntity<?> findMeetingByCreatorid(@PathVariable(name = "userid") Long userid)
+    @GetMapping("/meeting/creator")
+    public ResponseEntity<?> findMeetingByCreatorid(@RequestParam(name = "userid") Long userid)
     {
         return meetingService.findMeetingByCreatorid(userid);
     }
 
     @GetMapping("/meeting/noninvited")
-    public ResponseEntity<?> findAllNonInvitedUsers(@RequestParam Long userId,@RequestParam Long meetingId)
+    public ResponseEntity<?> findAllNonInvitedUsers(@RequestParam(name = "userid") Long userId,@RequestParam Long meetingId)
     {
         return meetingService.findAllNonInvitedUsers(userId,meetingId);
     }
-    @GetMapping("/meeting/user/{userid}")
-    public ResponseEntity<?> getAllMeetingsByUserid(@PathVariable(name = "userid") Long userid)
+    @GetMapping("/meeting/user")
+    public ResponseEntity<?> getAllMeetingsByUserid(@RequestParam(name = "userid") Long userid)
     {
         return meetingService.getAllMeetingsByUserid(userid);
     }
