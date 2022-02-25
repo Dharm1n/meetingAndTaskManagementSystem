@@ -41,6 +41,9 @@ public class TaskServiceImpl implements TaskService{
     @Autowired
     NoAuthority noAuthority;
 
+    @Autowired
+    EmailService emailService;
+
     @Override
     public int addUserToTask(Long userid,UserToTask userToTask) {
         Optional<TaskAssignee> taskAssignee=taskAssigneeRepo.findByUserIdAndTaskId(userToTask.getUserId(),userToTask.getTaskId());
@@ -74,6 +77,11 @@ public class TaskServiceImpl implements TaskService{
                             task.get(),
                             userToTask.getStatus()
                     ));
+
+
+            String mail=user.get().getUsername();
+            //sender,subject,message,to
+            emailService.sendEmail("Task Scheduled","New Task assigned",mail);
         }
         catch (Exception e)
         {

@@ -39,6 +39,9 @@ public class MeetingServiceImpl implements MeetingService{
     @Autowired
     NoAuthority noAuthority;
 
+    @Autowired
+    EmailService emailService;
+
     @Override
     public int addUserToMeeting(Long userid,UserToMeeting userToMeeting) {
         Optional<MeetingAttendee> meetingAttendee=meetingAttendeeRepo.findByMeetingIdAndUserId(userToMeeting.getMeetingId(),userToMeeting.getUserId());
@@ -68,6 +71,10 @@ public class MeetingServiceImpl implements MeetingService{
                             meeting.get(),
                             userToMeeting.getStatus()
                     ));
+
+            String mail=user.get().getUsername();
+            //sender,subject,message,to
+            emailService.sendEmail("Meeting Scheduled","New meeting assigned",mail);
         }
         catch (Exception e)
         {
