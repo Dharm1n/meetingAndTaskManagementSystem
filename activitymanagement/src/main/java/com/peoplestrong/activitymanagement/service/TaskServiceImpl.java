@@ -240,7 +240,7 @@ public class TaskServiceImpl implements TaskService{
             return ResponseEntity.badRequest().body(userNotFound);
         }
         List<Task> tasksCreatedbyuserList = taskRepo.findByCreator(userid);
-        Set<TaskFromCreator> taskCreated=new HashSet<>();
+        List<TaskFromCreator> taskCreated=new ArrayList<>();
 
         for(Task tasksCreatedbyuser:tasksCreatedbyuserList)
         {
@@ -278,6 +278,7 @@ public class TaskServiceImpl implements TaskService{
                     user.get().getName()
             ));
         }
+        taskCreated.sort((o1, o2) -> o1.getDeadline().compareTo(o2.getDeadline()));
         return ResponseEntity.ok().body(taskCreated);
     }
 
@@ -290,7 +291,7 @@ public class TaskServiceImpl implements TaskService{
         }
 
         List<TaskAssignee> taskAssigneeSet=taskAssigneeRepo.findByUserId(userid);
-        Set<TaskFromTaskassignee> taskAssigned=new HashSet<>();
+        List<TaskFromTaskassignee> taskAssigned=new ArrayList<>();
         for(TaskAssignee taskAssignee:taskAssigneeSet)
         {
             Task task=taskAssignee.getTask();
@@ -305,7 +306,9 @@ public class TaskServiceImpl implements TaskService{
                     userRepo.findById(task.getCreator()).get().getName()
             ));
         }
-        Set<TaskFromCreator> taskCreated=new HashSet<>();
+        taskAssigned.sort((o1, o2) -> o1.getDeadline().compareTo(o2.getDeadline()));
+
+        List<TaskFromCreator> taskCreated=new ArrayList<>();
         List<Task> tasksCreatedbyuserList = taskRepo.findByCreator(userid);
 
         for(Task tasksCreatedbyuser:tasksCreatedbyuserList)
@@ -344,7 +347,7 @@ public class TaskServiceImpl implements TaskService{
                     user.get().getName()
             ));
         }
-
+        taskCreated.sort((o1, o2) -> o1.getDeadline().compareTo(o2.getDeadline()));
         Map<String,Object> allTask=new HashMap<String,Object>();
         allTask.put("created",taskCreated);
         allTask.put("assigned",taskAssigned);

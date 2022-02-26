@@ -274,7 +274,7 @@ public class MeetingServiceImpl implements MeetingService{
             return ResponseEntity.badRequest().body(userNotFound);
         }
         List<Meeting> meetingCreatedbyuserList = meetingRepo.findByCreator(userid);
-        Set<MeetingFromCreator> meetingCreated=new HashSet<>();
+        List<MeetingFromCreator> meetingCreated=new ArrayList<>();
 
         for(Meeting meetingCreatedbyuser:meetingCreatedbyuserList)
         {
@@ -308,6 +308,8 @@ public class MeetingServiceImpl implements MeetingService{
                     user.get().getName()
             ));
         }
+        meetingCreated.sort((o1, o2) -> o1.getMeetingTime().compareTo(o2.getMeetingTime()));
+
         return ResponseEntity.ok().body(meetingCreated);
     }
 
@@ -319,7 +321,7 @@ public class MeetingServiceImpl implements MeetingService{
             return ResponseEntity.badRequest().body(userNotFound);
         }
         List<Meeting> meetingCreatedbyuserList = meetingRepo.findByCreator(userid);
-        Set<MeetingFromCreator> meetingCreated=new HashSet<>();
+        List<MeetingFromCreator> meetingCreated=new ArrayList<>();
 
         for(Meeting meetingCreatedbyuser:meetingCreatedbyuserList)
         {
@@ -353,8 +355,10 @@ public class MeetingServiceImpl implements MeetingService{
                     user.get().getName()
             ));
         }
+        meetingCreated.sort((o1, o2) -> o1.getMeetingTime().compareTo(o2.getMeetingTime()));
+
         List<MeetingAttendee> meetingAttendeeList=meetingAttendeeRepo.findByUserId(userid);
-        Set<MeetingFromMeetingAttendee> meetingAttend=new HashSet<>();
+        List<MeetingFromMeetingAttendee> meetingAttend=new ArrayList<>();
         for(MeetingAttendee meetingAttendee:meetingAttendeeList)
         {
             Meeting meeting=meetingAttendee.getMeeting();
@@ -368,6 +372,8 @@ public class MeetingServiceImpl implements MeetingService{
                     userRepo.findById(meeting.getCreator()).get().getName()
             ));
         }
+        meetingAttend.sort((o1, o2) -> o1.getMeetingTime().compareTo(o2.getMeetingTime()));
+
         Map<String,Object> allMeeting=new HashMap<String,Object>();
         allMeeting.put("created",meetingCreated);
         allMeeting.put("assigned",meetingAttend);
