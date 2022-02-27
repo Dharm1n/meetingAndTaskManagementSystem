@@ -13,6 +13,7 @@ public interface UserService {
     void addRoleToUser(String username,String rolename);
     Optional<User> getUser(String username);
     List<User> getUsers();
-
+    Optional<User> findByUsername(String email);
+    Optional<User> findUserByResetToken(String resetToken);
     ResponseEntity<?> getUserIdByUsername(String username);
 }

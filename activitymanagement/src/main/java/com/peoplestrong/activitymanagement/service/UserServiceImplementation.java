@@ -106,4 +106,16 @@ public class UserServiceImplementation implements UserService, UserDetailsServic
         else
             return ResponseEntity.ok().body(new GetUserid(user.get().getId()));
     }
+
+    @Override
+    public Optional findByUsername(String email)
+    {
+        return userRepo.findByUsername(email);
+    }
+
+    @Override
+    public Optional findUserByResetToken(String resetToken)
+    {
+        return userRepo.findByResetToken(resetToken);
+    }
 }

@@ -44,6 +44,9 @@ public class User {
 	@OneToMany(mappedBy = "user", orphanRemoval = true,cascade = CascadeType.ALL,fetch = FetchType.LAZY)
 	private Set<MeetingAttendee> meetingStatus = new HashSet<>();
 
+	@Column(name="reset_token")
+	private String resetToken;
+
 	public Set<MeetingAttendee> getMeetingStatus() {
 		return meetingStatus;
 	}
@@ -114,6 +117,16 @@ public class User {
 
 	public void setTaskStatus(Set<TaskAssignee> taskStatus) {
 		this.taskStatus = taskStatus;
+	}
+
+	public String getResetToken()
+	{
+		return resetToken;
+	}
+
+	public void setResetToken(String resetToken)
+	{
+		this.resetToken=resetToken;
 	}
 
 	@Override

@@ -31,6 +31,7 @@ public class UserController {
 
     @Autowired
     private RoleRepo roleRepo;
+
     @Autowired
     private PasswordEncoder passwordEncoder;
 

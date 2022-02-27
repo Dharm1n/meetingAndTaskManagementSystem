@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
 
+import javax.validation.constraints.Null;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -34,7 +35,7 @@ public class ActivitymanagementApplication {
 			userService.saveRole(new Role(null,"ROLE_USER"));
 			userService.saveRole(new Role(null,"ROLE_ADMIN"));
 
-			userService.saveUser(new User(null,"dharmin","n","hirapara","hirapara.nileshbhai@peoplestrong.com","123",new ArrayList<>(),new HashSet<>(),new HashSet<>()));
+			userService.saveUser(new User(null,"dharmin","n","hirapara","hirapara.nileshbhai@peoplestrong.com","123",new ArrayList<>(),new HashSet<>(),new HashSet<>(), " "));
 
 			userService.addRoleToUser("hirapara.nileshbhai@peoplestrong.com","ROLE_ADMIN");
 			userService.addRoleToUser("hirapara.nileshbhai@peoplestrong.com","ROLE_USER");
