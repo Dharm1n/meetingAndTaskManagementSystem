@@ -37,33 +37,30 @@ public class PasswordController {
     private PasswordEncoder passwordEncoder;
 
 @PostMapping("/forgot-password")
-public ResponseEntity<?> processForgotPasswordForm(HttpServletRequest request,@RequestParam("username") String username) {
+public ResponseEntity<?> processForgotPasswordForm(@RequestParam("username") String username) {
 
     Optional<User> optional = userService.findByUsername(username);
 
     if (!optional.isPresent()) {
         return ResponseEntity.badRequest().body(new MessageResponse("Error:User does not exists"));
-    } else {
-
-        URI uri=URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/forgot-password").toUriString());
+    }
+    else {
         User user = optional.get();
         // Generate random 36-character string token for reset password
         user.setResetToken(UUID.randomUUID().toString());
-
         // Save token to database
         userService.saveUser(user);
-
-        String appUrl = request.getScheme() + "://" + request.getServerName();
         String to=user.getUsername();
+        URI uri=URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/reset-password").toUriString());
         String subject="Password Reset Request";
-        String message="To reset your password, click the link below:\n" + appUrl + "/reset-password?token=" + user.getResetToken();
+        String message=uri+"?token=" + user.getResetToken();
         emailService.sendEmail(subject,message,to);
         return ResponseEntity.status(HttpStatus.OK).body("Reset Password link has been set to your email");
     }
 }
     @PostMapping("/reset-password")
-    public ResponseEntity<?> setNewPassword(@RequestBody Map<String, String> body) {
-        Optional<User> user = userService.findUserByResetToken(body.get("token"));
+    public ResponseEntity<?> setNewPassword(@RequestBody Map<String, String> body,@RequestParam("token") String token) {
+        Optional<User> user = userService.findUserByResetToken(token);
         if (user.isPresent()) {
             URI uri=URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/reset-password").toUriString());
             User resetUser = user.get();
