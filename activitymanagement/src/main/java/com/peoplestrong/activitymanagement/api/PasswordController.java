@@ -56,7 +56,7 @@ public ResponseEntity<?> processForgotPasswordForm(HttpServletRequest request,@R
         String appUrl = request.getScheme() + "://" + request.getServerName();
         String to=user.getUsername();
         String subject="Password Reset Request";
-        String message="To reset your password, click the link below:\n" + appUrl + "/reset?token=" + user.getResetToken();
+        String message="To reset your password, click the link below:\n" + appUrl + "/reset-password?token=" + user.getResetToken();
         emailService.sendEmail(subject,message,to);
         return ResponseEntity.status(HttpStatus.OK).body("Reset Password link has been set to your email");
     }
