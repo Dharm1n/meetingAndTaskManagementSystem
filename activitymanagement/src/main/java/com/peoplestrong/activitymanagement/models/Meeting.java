@@ -31,17 +31,33 @@ public class Meeting {
 	private String place;
 
 	@NotBlank
-	@Column(name = "creation_time")
+	@Column(name = "end_time")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-	private LocalDateTime creationTime;
+	private LocalDateTime endTime;
 
 	@NotBlank
-	@Column(name = "meeting_time")
+	@Column(name = "start_time")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-	private LocalDateTime meetingTime;
+	private LocalDateTime startTime;
 
 	@Column(name = "description" ,length = 65450, columnDefinition = "text")
 	private String description;
+
+	public LocalDateTime getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(LocalDateTime endTime) {
+		this.endTime = endTime;
+	}
+
+	public LocalDateTime getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(LocalDateTime startTime) {
+		this.startTime = startTime;
+	}
 
 	@OneToMany(mappedBy = "meeting", orphanRemoval = true,fetch = FetchType.LAZY)
 	private Set<MeetingAttendee> meetingAttendees = new HashSet<>();
@@ -78,21 +94,6 @@ public class Meeting {
 		this.place = place;
 	}
 
-	public LocalDateTime getCreationTime() {
-		return creationTime;
-	}
-
-	public void setCreationTime(LocalDateTime creationTime) {
-		this.creationTime = creationTime;
-	}
-
-	public LocalDateTime getMeetingTime() {
-		return meetingTime;
-	}
-
-	public void setMeetingTime(LocalDateTime meetingTime) {
-		this.meetingTime = meetingTime;
-	}
 
 	public String getDescription() {
 		return description;
@@ -110,13 +111,13 @@ public class Meeting {
 		this.meetingAttendees = meetingAttendees;
 	}
 
-	public Meeting(Long id, String purpose, Long creator, String place, LocalDateTime creationTime, LocalDateTime meetingTime, String description) {
+	public Meeting(Long id, String purpose, Long creator, String place, LocalDateTime startTime, LocalDateTime endTime, String description) {
 		this.id = id;
 		this.purpose = purpose;
 		this.creator = creator;
 		this.place = place;
-		this.creationTime = creationTime;
-		this.meetingTime = meetingTime;
+		this.startTime = startTime;
+		this.endTime = endTime;
 		this.description = description;
 	}
 
