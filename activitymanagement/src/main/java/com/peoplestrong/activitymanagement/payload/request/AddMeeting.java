@@ -18,20 +18,20 @@ public class AddMeeting {
     private String purpose;
     private Long creator;
     private String place;
-    private String startTime;
-    private String endTime;
+    private String creationTime;
+    private String meetingTime;
     private String description;
     private List<Long> meetingAttendees = new ArrayList<>();
 
     public AddMeeting() {
     }
 
-    public AddMeeting(String purpose, Long creator, String place, String startTime, String endTime, String description, List<Long> meetingAttendees) {
+    public AddMeeting(String purpose, Long creator, String place, String creationTime, String meetingTime, String description, List<Long> meetingAttendees) {
         this.purpose = purpose;
         this.creator = creator;
         this.place = place;
-        this.startTime = startTime;
-        this.endTime = endTime;
+        this.creationTime = creationTime;
+        this.meetingTime = meetingTime;
         this.description = description;
         this.meetingAttendees = meetingAttendees;
     }
@@ -60,20 +60,20 @@ public class AddMeeting {
         this.place = place;
     }
 
-    public String getStartTime() {
-        return startTime;
+    public String getCreationTime() {
+        return creationTime;
     }
 
-    public void setStartTime(String startTime) {
-        this.startTime = startTime;
+    public void setCreationTime(String creationTime) {
+        this.creationTime = creationTime;
     }
 
-    public String getEndTime() {
-        return endTime;
+    public String getMeetingTime() {
+        return meetingTime;
     }
 
-    public void setEndTime(String endTime) {
-        this.endTime = endTime;
+    public void setMeetingTime(String meetingTime) {
+        this.meetingTime = meetingTime;
     }
 
     public String getDescription() {

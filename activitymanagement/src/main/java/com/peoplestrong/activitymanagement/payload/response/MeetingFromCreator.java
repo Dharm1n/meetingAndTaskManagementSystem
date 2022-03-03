@@ -8,20 +8,20 @@ public class MeetingFromCreator {
     private Long meetingid;
     private String purpose;
     private Long creator;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    private LocalDateTime creationTime;
+    private LocalDateTime meetingTime;
     private String description;
     private List<UserMeetingStatus> meetingAttendees=new ArrayList<>();
     private Long accepted;
     private Long rejected;
     private String creatorName;
 
-    public MeetingFromCreator(Long meetingid, String purpose, Long creator, LocalDateTime startTime, LocalDateTime endTime, String description, List<UserMeetingStatus> meetingAttendees, Long accepted, Long rejected, String creatorName) {
+    public MeetingFromCreator(Long meetingid, String purpose, Long creator, LocalDateTime creationTime, LocalDateTime meetingTime, String description, List<UserMeetingStatus> meetingAttendees, Long accepted, Long rejected, String creatorName) {
         this.meetingid = meetingid;
         this.purpose = purpose;
         this.creator = creator;
-        this.startTime = startTime;
-        this.endTime = endTime;
+        this.creationTime = creationTime;
+        this.meetingTime = meetingTime;
         this.description = description;
         this.meetingAttendees = meetingAttendees;
         this.accepted = accepted;
@@ -80,20 +80,20 @@ public class MeetingFromCreator {
         this.creator = creator;
     }
 
-    public LocalDateTime getStartTime() {
-        return startTime;
+    public LocalDateTime getCreationTime() {
+        return creationTime;
     }
 
-    public void setStartTime(LocalDateTime startTime) {
-        this.startTime = startTime;
+    public void setCreationTime(LocalDateTime creationTime) {
+        this.creationTime = creationTime;
     }
 
-    public LocalDateTime getEndTime() {
-        return endTime;
+    public LocalDateTime getMeetingTime() {
+        return meetingTime;
     }
 
-    public void setEndTime(LocalDateTime endTime) {
-        this.endTime = endTime;
+    public void setMeetingTime(LocalDateTime meetingTime) {
+        this.meetingTime = meetingTime;
     }
 
     public String getDescription() {

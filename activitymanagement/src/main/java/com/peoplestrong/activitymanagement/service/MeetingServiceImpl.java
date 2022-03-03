@@ -101,8 +101,7 @@ public class MeetingServiceImpl implements MeetingService{
             return 5;
         }
         meetingfromdb.get().setCreator(meeting.getCreator());
-        meetingfromdb.get().setStartTime(meeting.getStartTime());
-        meetingfromdb.get().setEndTime(meeting.getEndTime());
+        meetingfromdb.get().setMeetingTime(meeting.getMeetingTime());
         meetingfromdb.get().setDescription(meeting.getDescription());
         meetingfromdb.get().setPurpose(meeting.getPurpose());
         meetingfromdb.get().setPlace(meeting.getPlace());
@@ -128,7 +127,7 @@ public class MeetingServiceImpl implements MeetingService{
         {
             return 5;
         }
-        meetingfromdb.get().setStartTime(meeting.getStartTime());
+        meetingfromdb.get().setMeetingTime(meeting.getMeetingTime());
         meetingRepo.save(meetingfromdb.get());
 
         return 0;
@@ -300,8 +299,8 @@ public class MeetingServiceImpl implements MeetingService{
             meetingCreated.add(new MeetingFromCreator(meetingCreatedbyuser.getId(),
                     meetingCreatedbyuser.getPurpose(),
                     userid,
-                    meetingCreatedbyuser.getStartTime(),
-                    meetingCreatedbyuser.getEndTime(),
+                    meetingCreatedbyuser.getCreationTime(),
+                    meetingCreatedbyuser.getMeetingTime(),
                     meetingCreatedbyuser.getDescription(),
                     userMeetingStatuses,
                     (long) acceptedCount.get(),
@@ -309,7 +308,7 @@ public class MeetingServiceImpl implements MeetingService{
                     user.get().getName()
             ));
         }
-        meetingCreated.sort((o1, o2) -> o1.getStartTime().compareTo(o2.getStartTime()));
+        meetingCreated.sort((o1, o2) -> o1.getMeetingTime().compareTo(o2.getMeetingTime()));
 
         return ResponseEntity.ok().body(meetingCreated);
     }
@@ -347,8 +346,8 @@ public class MeetingServiceImpl implements MeetingService{
             meetingCreated.add(new MeetingFromCreator(meetingCreatedbyuser.getId(),
                     meetingCreatedbyuser.getPurpose(),
                     userid,
-                    meetingCreatedbyuser.getStartTime(),
-                    meetingCreatedbyuser.getEndTime(),
+                    meetingCreatedbyuser.getCreationTime(),
+                    meetingCreatedbyuser.getMeetingTime(),
                     meetingCreatedbyuser.getDescription(),
                     userMeetingStatuses,
                     (long) acceptedCount.get(),
@@ -356,7 +355,7 @@ public class MeetingServiceImpl implements MeetingService{
                     user.get().getName()
             ));
         }
-        meetingCreated.sort((o1, o2) -> o1.getStartTime().compareTo(o2.getStartTime()));
+        meetingCreated.sort((o1, o2) -> o1.getMeetingTime().compareTo(o2.getMeetingTime()));
 
         List<MeetingAttendee> meetingAttendeeList=meetingAttendeeRepo.findByUserId(userid);
         List<MeetingFromMeetingAttendee> meetingAttend=new ArrayList<>();
@@ -366,14 +365,14 @@ public class MeetingServiceImpl implements MeetingService{
             meetingAttend.add(new MeetingFromMeetingAttendee(meeting.getId(),
                     meeting.getPurpose(),
                     meeting.getCreator(),
-                    meeting.getStartTime(),
-                    meeting.getEndTime(),
+                    meeting.getCreationTime(),
+                    meeting.getMeetingTime(),
                     meeting.getDescription(),
                     meetingAttendee.getStatus(),
                     userRepo.findById(meeting.getCreator()).get().getName()
             ));
         }
-        meetingAttend.sort((o1, o2) -> o1.getStartTime().compareTo(o2.getStartTime()));
+        meetingAttend.sort((o1, o2) -> o1.getMeetingTime().compareTo(o2.getMeetingTime()));
 
         Map<String,Object> allMeeting=new HashMap<String,Object>();
         allMeeting.put("created",meetingCreated);

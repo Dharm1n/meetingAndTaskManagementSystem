@@ -55,8 +55,8 @@ public class MeetingController {
                     addMeeting.getPurpose(),
                 addMeeting.getCreator(),
                 addMeeting.getPlace(),
-                LocalDateTime.parse(addMeeting.getStartTime(), formatter),
-                LocalDateTime.parse(addMeeting.getEndTime(), formatter),
+                LocalDateTime.parse(addMeeting.getCreationTime(), formatter),
+                LocalDateTime.parse(addMeeting.getMeetingTime(), formatter),
                 addMeeting.getDescription()
                 );
         meetingRepo.save(meeting);
