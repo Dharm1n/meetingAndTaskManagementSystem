@@ -31,12 +31,12 @@ public class Meeting {
 	private String place;
 
 	@NotBlank
-	@Column(name = "creation_time")
+	@Column(name = "start_time")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm")
 	private LocalDateTime creationTime;
 
 	@NotBlank
-	@Column(name = "meeting_time")
+	@Column(name = "end_time")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm")
 	private LocalDateTime meetingTime;
 

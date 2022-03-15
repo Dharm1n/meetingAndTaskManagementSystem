@@ -105,6 +105,7 @@ public class MeetingServiceImpl implements MeetingService{
         meetingfromdb.get().setDescription(meeting.getDescription());
         meetingfromdb.get().setPurpose(meeting.getPurpose());
         meetingfromdb.get().setPlace(meeting.getPlace());
+        meetingfromdb.get().setCreationTime(meeting.getCreationTime());
 
         meetingRepo.save(meetingfromdb.get());
 
