@@ -34,10 +34,19 @@ public class ActivitymanagementApplication {
 			userService.saveRole(new Role(null,"ROLE_USER"));
 			userService.saveRole(new Role(null,"ROLE_ADMIN"));
 
-			userService.saveUser(new User(null,"dharmin","n","hirapara","hirapara.nileshbhai@peoplestrong.com","123",new ArrayList<>(),new HashSet<>(),new HashSet<>()));
+			userService.saveUser(new User(null,"aaa dharmin0","n","hirapara","hirapara0.nileshbhai@peoplestrong.com","123",new ArrayList<>(),new HashSet<>(),new HashSet<>()));
+			userService.saveUser(new User(null,"bbo dharmin1","n","hirapara","hirapara1.nileshbhai@peoplestrong.com","123",new ArrayList<>(),new HashSet<>(),new HashSet<>()));
+			userService.saveUser(new User(null,"baba dharmin2","n","hirapara","hirapara2.nileshbhai@peoplestrong.com","123",new ArrayList<>(),new HashSet<>(),new HashSet<>()));
+			userService.saveUser(new User(null,"aab dharmin3","n","hirapara","hirapara3.nileshbhai@peoplestrong.com","123",new ArrayList<>(),new HashSet<>(),new HashSet<>()));
+			userService.saveUser(new User(null,"bcab dharmin4","n","hirapara","hirapara4.nileshbhai@peoplestrong.com","123",new ArrayList<>(),new HashSet<>(),new HashSet<>()));
+			userService.saveUser(new User(null,"bacc dharmin5","n","hirapara","hirapara5.nileshbhai@peoplestrong.com","123",new ArrayList<>(),new HashSet<>(),new HashSet<>()));
+			userService.saveUser(new User(null,"aaca dharmin6","n","hirapara","hirapara6.nileshbhai@peoplestrong.com","123",new ArrayList<>(),new HashSet<>(),new HashSet<>()));
+			userService.saveUser(new User(null,"abab dharmin7","n","hirapara","hirapara7.nileshbhai@peoplestrong.com","123",new ArrayList<>(),new HashSet<>(),new HashSet<>()));
+			userService.saveUser(new User(null,"aabba dharmin8","n","hirapara","hirapara8.nileshbhai@peoplestrong.com","123",new ArrayList<>(),new HashSet<>(),new HashSet<>()));
+			userService.saveUser(new User(null,"aaad dharmin9","n","hirapara","hirapara9.nileshbhai@peoplestrong.com","123",new ArrayList<>(),new HashSet<>(),new HashSet<>()));
 
-			userService.addRoleToUser("hirapara.nileshbhai@peoplestrong.com","ROLE_ADMIN");
-			userService.addRoleToUser("hirapara.nileshbhai@peoplestrong.com","ROLE_USER");
+			userService.addRoleToUser("hirapara0.nileshbhai@peoplestrong.com","ROLE_ADMIN");
+			userService.addRoleToUser("hirapara0.nileshbhai@peoplestrong.com","ROLE_USER");
 
 		};
 	}
