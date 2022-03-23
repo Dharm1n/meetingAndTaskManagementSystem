@@ -109,7 +109,7 @@ public class TaskServiceImpl implements TaskService{
         taskfromdb.get().setDeadline(task.getDeadline());
         taskfromdb.get().setDescription(task.getDescription());
         taskfromdb.get().setTitle(task.getTitle());
-
+        taskfromdb.get().setCreationTime(task.getCreationTime());
         taskRepo.save(taskfromdb.get());
 
         return 0;
