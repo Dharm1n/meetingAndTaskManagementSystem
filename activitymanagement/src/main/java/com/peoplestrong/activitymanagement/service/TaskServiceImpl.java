@@ -41,6 +41,9 @@ public class TaskServiceImpl implements TaskService{
     @Autowired
     NoAuthority noAuthority;
 
+    @Autowired
+    EmailService emailService;
+
     @Override
     public int addUserToTask(Long userid,UserToTask userToTask) {
         Optional<TaskAssignee> taskAssignee=taskAssigneeRepo.findByUserIdAndTaskId(userToTask.getUserId(),userToTask.getTaskId());
@@ -74,6 +77,11 @@ public class TaskServiceImpl implements TaskService{
                             task.get(),
                             userToTask.getStatus()
                     ));
+
+
+            String mail=user.get().getUsername();
+            //sender,subject,message,to
+            emailService.sendEmail("Task Scheduled","New Task assigned",mail);
         }
         catch (Exception e)
         {
@@ -101,7 +109,7 @@ public class TaskServiceImpl implements TaskService{
         taskfromdb.get().setDeadline(task.getDeadline());
         taskfromdb.get().setDescription(task.getDescription());
         taskfromdb.get().setTitle(task.getTitle());
-
+        taskfromdb.get().setCreationTime(task.getCreationTime());
         taskRepo.save(taskfromdb.get());
 
         return 0;
@@ -232,7 +240,7 @@ public class TaskServiceImpl implements TaskService{
             return ResponseEntity.badRequest().body(userNotFound);
         }
         List<Task> tasksCreatedbyuserList = taskRepo.findByCreator(userid);
-        Set<TaskFromCreator> taskCreated=new HashSet<>();
+        List<TaskFromCreator> taskCreated=new ArrayList<>();
 
         for(Task tasksCreatedbyuser:tasksCreatedbyuserList)
         {
@@ -270,6 +278,7 @@ public class TaskServiceImpl implements TaskService{
                     user.get().getName()
             ));
         }
+        taskCreated.sort((o1, o2) -> o1.getDeadline().compareTo(o2.getDeadline()));
         return ResponseEntity.ok().body(taskCreated);
     }
 
@@ -282,7 +291,7 @@ public class TaskServiceImpl implements TaskService{
         }
 
         List<TaskAssignee> taskAssigneeSet=taskAssigneeRepo.findByUserId(userid);
-        Set<TaskFromTaskassignee> taskAssigned=new HashSet<>();
+        List<TaskFromTaskassignee> taskAssigned=new ArrayList<>();
         for(TaskAssignee taskAssignee:taskAssigneeSet)
         {
             Task task=taskAssignee.getTask();
@@ -297,7 +306,9 @@ public class TaskServiceImpl implements TaskService{
                     userRepo.findById(task.getCreator()).get().getName()
             ));
         }
-        Set<TaskFromCreator> taskCreated=new HashSet<>();
+        taskAssigned.sort((o1, o2) -> o1.getDeadline().compareTo(o2.getDeadline()));
+
+        List<TaskFromCreator> taskCreated=new ArrayList<>();
         List<Task> tasksCreatedbyuserList = taskRepo.findByCreator(userid);
 
         for(Task tasksCreatedbyuser:tasksCreatedbyuserList)
@@ -336,7 +347,7 @@ public class TaskServiceImpl implements TaskService{
                     user.get().getName()
             ));
         }
-
+        taskCreated.sort((o1, o2) -> o1.getDeadline().compareTo(o2.getDeadline()));
         Map<String,Object> allTask=new HashMap<String,Object>();
         allTask.put("created",taskCreated);
         allTask.put("assigned",taskAssigned);

@@ -39,6 +39,9 @@ public class MeetingServiceImpl implements MeetingService{
     @Autowired
     NoAuthority noAuthority;
 
+    @Autowired
+    EmailService emailService;
+
     @Override
     public int addUserToMeeting(Long userid,UserToMeeting userToMeeting) {
         Optional<MeetingAttendee> meetingAttendee=meetingAttendeeRepo.findByMeetingIdAndUserId(userToMeeting.getMeetingId(),userToMeeting.getUserId());
@@ -68,6 +71,10 @@ public class MeetingServiceImpl implements MeetingService{
                             meeting.get(),
                             userToMeeting.getStatus()
                     ));
+
+            String mail=user.get().getUsername();
+            //sender,subject,message,to
+            emailService.sendEmail("Meeting Scheduled","New meeting assigned",mail);
         }
         catch (Exception e)
         {
@@ -98,6 +105,7 @@ public class MeetingServiceImpl implements MeetingService{
         meetingfromdb.get().setDescription(meeting.getDescription());
         meetingfromdb.get().setPurpose(meeting.getPurpose());
         meetingfromdb.get().setPlace(meeting.getPlace());
+        meetingfromdb.get().setCreationTime(meeting.getCreationTime());
 
         meetingRepo.save(meetingfromdb.get());
 
@@ -267,7 +275,7 @@ public class MeetingServiceImpl implements MeetingService{
             return ResponseEntity.badRequest().body(userNotFound);
         }
         List<Meeting> meetingCreatedbyuserList = meetingRepo.findByCreator(userid);
-        Set<MeetingFromCreator> meetingCreated=new HashSet<>();
+        List<MeetingFromCreator> meetingCreated=new ArrayList<>();
 
         for(Meeting meetingCreatedbyuser:meetingCreatedbyuserList)
         {
@@ -301,6 +309,8 @@ public class MeetingServiceImpl implements MeetingService{
                     user.get().getName()
             ));
         }
+        meetingCreated.sort((o1, o2) -> o1.getMeetingTime().compareTo(o2.getMeetingTime()));
+
         return ResponseEntity.ok().body(meetingCreated);
     }
 
@@ -312,7 +322,7 @@ public class MeetingServiceImpl implements MeetingService{
             return ResponseEntity.badRequest().body(userNotFound);
         }
         List<Meeting> meetingCreatedbyuserList = meetingRepo.findByCreator(userid);
-        Set<MeetingFromCreator> meetingCreated=new HashSet<>();
+        List<MeetingFromCreator> meetingCreated=new ArrayList<>();
 
         for(Meeting meetingCreatedbyuser:meetingCreatedbyuserList)
         {
@@ -346,8 +356,10 @@ public class MeetingServiceImpl implements MeetingService{
                     user.get().getName()
             ));
         }
+        meetingCreated.sort((o1, o2) -> o1.getMeetingTime().compareTo(o2.getMeetingTime()));
+
         List<MeetingAttendee> meetingAttendeeList=meetingAttendeeRepo.findByUserId(userid);
-        Set<MeetingFromMeetingAttendee> meetingAttend=new HashSet<>();
+        List<MeetingFromMeetingAttendee> meetingAttend=new ArrayList<>();
         for(MeetingAttendee meetingAttendee:meetingAttendeeList)
         {
             Meeting meeting=meetingAttendee.getMeeting();
@@ -361,6 +373,8 @@ public class MeetingServiceImpl implements MeetingService{
                     userRepo.findById(meeting.getCreator()).get().getName()
             ));
         }
+        meetingAttend.sort((o1, o2) -> o1.getMeetingTime().compareTo(o2.getMeetingTime()));
+
         Map<String,Object> allMeeting=new HashMap<String,Object>();
         allMeeting.put("created",meetingCreated);
         allMeeting.put("assigned",meetingAttend);

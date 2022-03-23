@@ -15,11 +15,11 @@ public class Role {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "role_id")
+    @Column(name = "id")
     private Long id;
 
     @NotBlank
-    @Column(name = "email",unique=true)
+    @Column(name = "name",unique=true)
     private String name;
 
     public Long getId() {
